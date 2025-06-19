@@ -11,30 +11,47 @@ class MateriSeeder extends Seeder
     {
         DB::table('materis')->insert([
             [
-                'judul' => 'Pengenalan Algoritma',
-                'deskripsi' => 'Belajar tentang konsep dasar algoritma dan logika pemrograman.',
-                'label' => 'Algoritma',
-                'thumbnail' => 'https://source.unsplash.com/400x300/?algorithm',
+                'judul' => 'Dasar Pemrograman Java',
+                'deskripsi' => 'Pelajari konsep dasar Java seperti variabel, tipe data, dan struktur kontrol.',
+                'label' => 'Java',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'judul' => 'Struktur Data Dasar',
-                'deskripsi' => 'Memahami array, list, stack, dan queue.',
-                'label' => 'Struktur Data',
-                'thumbnail' => 'https://source.unsplash.com/400x300/?data',
+                'judul' => 'OOP dengan Java',
+                'deskripsi' => 'Pahami konsep Object-Oriented Programming di Java seperti class, inheritance, dan interface.',
+                'label' => 'Java',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'judul' => 'Dasar-dasar Basis Data',
-                'deskripsi' => 'Pengenalan basis data relasional dan query SQL.',
-                'label' => 'Database',
-                'thumbnail' => 'https://source.unsplash.com/400x300/?database',
+                'judul' => 'Pemrograman C untuk Pemula',
+                'deskripsi' => 'Memahami syntax dasar C, pointer, dan manajemen memori.',
+                'label' => 'C',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'judul' => 'Struktur Data dengan C',
+                'deskripsi' => 'Pelajari struktur data seperti linked list, stack, dan queue menggunakan C.',
+                'label' => 'C',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'judul' => 'Python Fundamental',
+                'deskripsi' => 'Belajar Python dari dasar: variabel, fungsi, dan manipulasi data.',
+                'label' => 'Python',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'judul' => 'Automasi dengan Python',
+                'deskripsi' => 'Gunakan Python untuk otomasi tugas, scraping, dan pengolahan file.',
+                'label' => 'Python',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
         ]);
     }
 }
-

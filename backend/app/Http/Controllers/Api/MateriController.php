@@ -20,7 +20,6 @@ class MateriController extends Controller
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'label' => 'required|string',
-            'thumbnail' => 'nullable|string'
         ]);
 
         $materi = Materi::create($validated);

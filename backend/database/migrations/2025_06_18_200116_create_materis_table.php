@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('judul');
             $table->text('deskripsi');
             $table->string('label'); // topik atau kategori
-            $table->string('thumbnail')->nullable(); // url gambar
             $table->timestamps();
         });
     }

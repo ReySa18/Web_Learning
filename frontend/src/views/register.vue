@@ -203,8 +203,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios' // Tambahkan import axios
 
+const router = useRouter()
 // Reactive data
 const fullName = ref('')
 const email = ref('')
@@ -291,6 +293,11 @@ const handleRegister = async () => {
     confirmPassword.value = ''
     agreeTerms.value = false
     newsletter.value = false
+
+    // Arahkan ke halaman login setelah 2 detik
+    setTimeout(() => {
+      router.push('/') // atau '/' sesuai rute login kamu
+    }, 1000)
   } catch (error) {
     console.error('❌ REGISTER ERROR:', error)
     if (error.response && error.response.status === 422) {

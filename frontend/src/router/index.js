@@ -1,19 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import Register from '../views/Register.vue'
-import Login from '../views/Login.vue'
-import Home from '../views/Home.vue'
+import Login from '../views/login.vue'
+import Home from '../views/home.vue'
 import Kuiz from '../views/kuis.vue'
 import Soal from '../views/Soal.vue'
+import Kelas from '../views/kelas.vue'
 import Admin from '../views/admin/admin.vue'
 import UserManagement from '../views/admin/user.vue'
 
 const routes = [
-  { path: '/', name: 'Home', component: Home },
+  { path: '/', name: 'Login', component: Login },
+  { path: '/home', name: 'Home', component: Home },
   { path: '/register', name: 'Register', component: Register },
-  { path: '/login', name: 'Login', component: Login },
   { path: '/kuis', name: 'Kuiz', component: Kuiz },
   { path: '/soal', name: 'Soal', component: Soal },
+  { path: '/kelas', name: 'Kelas', component: Kelas },
   { path: '/admin',
     name: 'admin',
     component: Admin,

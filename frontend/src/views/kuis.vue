@@ -27,10 +27,10 @@
           <!-- Desktop Navigation -->
           <div class="hidden md:block">
             <div class="ml-6 md:ml-10 flex items-baseline space-x-3 md:space-x-4">
-              <router-link to="/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</router-link>
-              <router-link to="/kuis" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kelas</router-link>
-              <router-link to="/kuiz" class="nav-active  text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kuiz</router-link>
-              <router-link to="/profile" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Profile</router-link>
+              <router-link to="/home" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</router-link>
+              <router-link to="/kelas" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kelas</router-link>
+              <router-link to="/kuis" class="nav-active  text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kuiz</router-link>
+              <router-link to="/profile" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">contact</router-link>
             </div>
           </div>
 
@@ -235,13 +235,13 @@
     <!-- Enhanced mobile navigation with active indicator -->
     <div class="md:hidden fixed bottom-0 left-0 right-0 glass-effect border-t border-gray-700 z-40 mobile-nav-height">
         <div class="flex justify-around items-center h-full py-1.5">
-            <router-link to="/"class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
+            <router-link to="/home"class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 <span class="text-xs">Home</span>
             </router-link>
-            <router-link to="/materi" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
+            <router-link to="/kelas" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                <span class="text-xs">Materi</span>
+                <span class="text-xs">Kelas</span>
             </router-link>
             <router-link to="/kuis" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
@@ -250,7 +250,7 @@
             </router-link>
             <router-link to="/profile" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                <span class="text-xs">Profile</span>
+                <span class="text-xs">contact</span>
             </router-link>
         </div>
     </div>

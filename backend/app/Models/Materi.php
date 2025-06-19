@@ -13,6 +13,5 @@ class Materi extends Model
         'judul',
         'deskripsi',
         'label',
-        'thumbnail',
     ];
 }

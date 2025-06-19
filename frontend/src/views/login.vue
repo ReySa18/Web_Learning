@@ -115,12 +115,14 @@
       <div class="mt-6 text-center">
         <p class="text-gray-400">
           Belum punya akun? 
-          <button 
-            @click="$emit('go-register')" 
-            class="text-white hover:text-gray-300 font-medium transition-colors underline"
-          >
-            Daftar sekarang
-          </button>
+          <router-link to="/register">
+            <button 
+              @click="$emit('go-register')" 
+              class="text-white hover:text-gray-300 font-medium transition-colors underline"
+            >
+              Daftar sekarang
+            </button>
+          </router-link>
         </p>
       </div>
     </div>
@@ -196,7 +198,7 @@ const handleLogin = async () => {
     if (user.role === 'admin') {
       router.push('/admin')
     } else {
-      router.push('/')
+      router.push('/home')
     }
 
     // Reset form
