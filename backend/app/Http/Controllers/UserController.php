@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User; 
+use App\Models\User;
 
 class UserController extends Controller
 {
+    public function index()
+    {
+        // Ambil semua data user dan kembalikan dalam bentuk JSON
+        return response()->json(User::all());
+    }
+
     public function changeRole(Request $request, $id)
     {
         // Cek apakah user yang login adalah admin
@@ -18,7 +24,7 @@ class UserController extends Controller
             'role' => 'required|in:admin,instruktur,siswa'
         ]);
 
-        $user = \App\Models\User::findOrFail($id);
+        $user = User::findOrFail($id);
         $user->role = $request->role;
         $user->save();
 
@@ -44,10 +50,15 @@ class UserController extends Controller
             'role' => $validated['role'],
         ]);
 
+        // Kembalikan hanya data yang diperlukan
         return response()->json([
             'message' => 'User berhasil dibuat.',
-            'user' => $user
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ]
         ], 201);
     }
-
 }

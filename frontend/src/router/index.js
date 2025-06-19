@@ -24,16 +24,31 @@ const routes = [
         const role = localStorage.getItem('user_role')
 
         if (!token) {
-          next('/login')
-        } else if (role !== 'admin') {
-          alert('Kamu bukan admin!')
-          next('/login')
+          next('/home')
+        } else if (role !== 'admin' && role !== 'instruktur') {
+          alert('Kamu tidak memiliki hak akses!')
+          next('/home')
         } else {
           next()
         } 
       }
     },
-  { path: '/usermanagement', name: 'Managemen User', component: UserManagement}
+  { path: '/usermanagement', name: 'Managemen User', 
+    component: UserManagement,
+    beforeEnter: (to, from, next) => {
+        const token = localStorage.getItem('auth_token')
+        const role = localStorage.getItem('user_role')
+
+        if (!token) {
+          next('/home')
+        } else if (role !== 'admin' && role !== 'instruktur') {
+          alert('Kamu tidak memiliki hak akses!')
+          next('/home')
+        } else {
+          next()
+        } 
+      }
+  }
 ]
 
 const router = createRouter({

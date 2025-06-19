@@ -17,9 +17,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/admin/users/{id}/role', [UserController::class, 'changeRole']);
 });
 
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/users', [UserController::class, 'store']);
 });
+
 
 Route::get('/test', function () {
     return response()->json(['message' => 'test ok']);
@@ -28,3 +29,5 @@ Route::get('/test', function () {
 
 Route::get('/materi', [MateriController::class, 'index']);
 Route::post('/materi', [MateriController::class, 'store']);
+
+Route::get('/users', [UserController::class, 'index']);

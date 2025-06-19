@@ -102,8 +102,8 @@
               <select v-model="roleFilter">
                 <option value="all">Semua Peran</option>
                 <option value="admin">Admin</option>
-                <option value="instructor">Instruktur</option>
-                <option value="student">Siswa</option>
+                <option value="instruktur">Instruktur</option>
+                <option value="siswa">Siswa</option>
               </select>
             </div>
             
@@ -137,7 +137,7 @@
               <span class="stat-label">Pengguna Aktif</span>
             </div>
             <div class="stat-item">
-              <span class="stat-value">{{ instructorCount }}</span>
+              <span class="stat-value">{{ instrukturCount }}</span>
               <span class="stat-label">Instruktur</span>
             </div>
           </div>
@@ -174,8 +174,8 @@
               <div class="table-cell">
                 <select v-model="user.role" @change="updateUserRole(user)" class="role-select">
                   <option value="admin">Admin</option>
-                  <option value="instructor">Instruktur</option>
-                  <option value="student">Siswa</option>
+                  <option value="instruktur">Instruktur</option>
+                  <option value="siswa">Siswa</option>
                 </select>
               </div>
               <div class="table-cell">
@@ -269,8 +269,8 @@
             <div class="form-group">
               <label>Peran</label>
               <select v-model="newUser.role">
-                <option value="student">Siswa</option>
-                <option value="instructor">Instruktur</option>
+                <option value="siswa">Siswa</option>
+                <option value="instruktur">Instruktur</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
@@ -347,8 +347,8 @@
             <div class="form-group">
               <label>Peran</label>
               <select v-model="editingUser.role">
-                <option value="student">Siswa</option>
-                <option value="instructor">Instruktur</option>
+                <option value="siswa">Siswa</option>
+                <option value="instruktur">Instruktur</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
@@ -432,7 +432,7 @@ export default {
         name: '',
         email: '',
         phone: '',
-        role: 'student',
+        role: 'siswa',
         status: 'active',
         password: '',
         joinDate: this.getCurrentDate(),
@@ -441,46 +441,30 @@ export default {
       },
       editingUser: {},
       userToDelete: {},
-      users: [
-        {
-          id: 1,
-          name: 'Budi Santoso',
-          email: 'budi@example.com',
-          phone: '081234567890',
-          role: 'student',
-          status: 'active',
-          joinDate: '15 Mar 2023',
-          lastLogin: '2 jam lalu',
-          avatar: 'https://randomuser.me/api/portraits/men/41.jpg'
-        }
-      ]
-    }
+      users: [], // <-- Awalnya kosong, akan diisi dari API
+    };
   },
   computed: {
     filteredUsers() {
       let filtered = this.users;
-      
-      // Filter by search query
+
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(user => 
-          user.name.toLowerCase().includes(query) || 
+        filtered = filtered.filter(user =>
+          user.name.toLowerCase().includes(query) ||
           user.email.toLowerCase().includes(query) ||
           (user.phone && user.phone.includes(query))
-      );
+        );
       }
-      
-      // Filter by role
+
       if (this.roleFilter !== 'all') {
         filtered = filtered.filter(user => user.role === this.roleFilter);
       }
-      
-      // Filter by status
+
       if (this.statusFilter !== 'all') {
         filtered = filtered.filter(user => user.status === this.statusFilter);
       }
-      
-      // Sort users
+
       if (this.sortBy === 'name') {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
       } else if (this.sortBy === 'name_desc') {
@@ -490,14 +474,14 @@ export default {
       } else if (this.sortBy === 'oldest') {
         filtered.sort((a, b) => new Date(a.joinDate) - new Date(b.joinDate));
       }
-      
+
       return filtered;
     },
     activeUserCount() {
       return this.users.filter(user => user.status === 'active').length;
     },
-    instructorCount() {
-      return this.users.filter(user => user.role === 'instructor').length;
+    instrukturCount() {
+      return this.users.filter(user => user.role === 'instruktur').length;
     },
     totalPages() {
       return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
@@ -509,13 +493,58 @@ export default {
     }
   },
   methods: {
+    async fetchUsers() {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await axios.get('http://localhost:8000/api/users', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        this.users = response.data.map(user => ({
+          ...user,
+          status: 'active', // default value
+          phone: user.phone || '',
+          avatar: this.getRandomAvatar(),
+          joinDate: this.formatDate(user.created_at), // Gunakan tanggal dari server
+          lastLogin: '-' // Placeholder
+        }));
+      } catch (error) {
+        console.error('Gagal memuat user:', error);
+        this.$toast.error('Gagal memuat data pengguna dari server.');
+      }
+    },
+    getCurrentDate() {
+      const now = new Date();
+      return now.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    },
+    formatDate(dateString) {
+      if (!dateString) return this.getCurrentDate();
+      
+      const date = new Date(dateString);
+      return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    },
+    getRandomAvatar() {
+      const gender = Math.random() > 0.5 ? 'men' : 'women';
+      const id = Math.floor(Math.random() * 99);
+      return `https://randomuser.me/api/portraits/${gender}/${id}.jpg`;
+    },
     openAddUserModal() {
       this.newUser = {
-        id: this.users.length + 1,
+        id: '',
         name: '',
         email: '',
         phone: '',
-        role: 'student',
+        role: 'siswa',
         status: 'active',
         password: '',
         joinDate: this.getCurrentDate(),
@@ -528,7 +557,7 @@ export default {
       this.showAddUserModal = false;
     },
     openEditUserModal(user) {
-      this.editingUser = {...user};
+      this.editingUser = { ...user };
       this.showEditUserModal = true;
     },
     closeEditUserModal() {
@@ -536,96 +565,90 @@ export default {
       this.resetPassword = '';
     },
     confirmDeleteUser(user) {
-      this.userToDelete = {...user};
+      this.userToDelete = { ...user };
       this.showDeleteConfirmation = true;
     },
-    getCurrentDate() {
-      const now = new Date();
-      return now.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-    },
-    getRandomAvatar() {
-      const gender = Math.random() > 0.5 ? 'men' : 'women';
-      const id = Math.floor(Math.random() * 99);
-      return `https://randomuser.me/api/portraits/${gender}/${id}.jpg`;
-    },
+    // Di method addNewUser
     async addNewUser() {
-    try {
-      // Generate random avatar untuk newUser
-      this.newUser.avatar = this.getRandomAvatar();
-
-      // Ambil token auth dari localStorage (sesuaikan kalau beda)
-      const token = localStorage.getItem('auth_token');
-
-      // Kirim data ke API Laravel (pastikan URL sesuai)
-      const response = await axios.post('http://localhost:8000/api/admin/users',
-        {
+      try {
+        const token = localStorage.getItem('auth_token');
+        
+        // Gunakan endpoint yang benar sesuai route Laravel
+        const response = await axios.post('http://localhost:8000/api/admin/users', {
           name: this.newUser.name,
           email: this.newUser.email,
           password: this.newUser.password,
           role: this.newUser.role,
-        },
-        {
+        }, {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
+        });
+
+        // Perbaiki cara menambahkan user baru ke state
+        this.users.push({
+          ...response.data.user,
+          avatar: this.getRandomAvatar(),
+          joinDate: this.getCurrentDate(),
+          lastLogin: '-',
+          status: 'active',
+          phone: ''
+        });
+        
+        this.showAddUserModal = false;
+        this.$toast.success('Pengguna berhasil ditambahkan');
+      } catch (error) {
+        console.error('Gagal tambah user:', error);
+        
+        if (error.response) {
+          console.error('Detail error:', error.response.data);
+          
+          // Tampilkan pesan error spesifik dari server
+          if (error.response.data.errors) {
+            const errors = Object.values(error.response.data.errors).flat();
+            this.$toast.error(errors.join(', ') || 'Gagal menambahkan pengguna.');
+          } else {
+            this.$toast.error(error.response.data.message || 'Gagal menambahkan pengguna.');
+          }
+        } else {
+          this.$toast.error('Terjadi kesalahan jaringan atau server.');
         }
-      );
-
-      // Tambahkan user baru dari response ke array users
-      this.users.push(response.data.user);
-
-      // Tutup modal
-      this.showAddUserModal = false;
-
-      // Notifikasi sukses
-      this.$toast.success('Pengguna berhasil ditambahkan');
-
-    } catch (error) {
-      console.error('Gagal tambah user:', error);
-      this.$toast.error('Gagal menambahkan pengguna. Periksa kembali data Anda.');
-    }
-  },
+      }
+    },
     saveUserChanges() {
-      // Find the user in the array and update it
       const index = this.users.findIndex(u => u.id === this.editingUser.id);
       if (index !== -1) {
-        this.users[index] = {...this.editingUser};
-        
-        // Reset password if provided
+        this.users[index] = { ...this.editingUser };
         if (this.resetPassword) {
           this.$toast.info('Password telah direset');
           this.resetPassword = '';
         }
       }
-      
-      // Close modal
       this.showEditUserModal = false;
       this.$toast.success('Perubahan berhasil disimpan');
     },
     deleteUser() {
-      // Remove the user from the list
       this.users = this.users.filter(user => user.id !== this.userToDelete.id);
-      
-      // Close confirmation modal
       this.showDeleteConfirmation = false;
       this.$toast.info('Pengguna berhasil dihapus');
     },
     updateUserRole(user) {
-      this.$toast.info(`Peran ${user.name} diubah menjadi ${user.role === 'admin' ? 'Admin' : user.role === 'instructor' ? 'Instruktur' : 'Siswa'}`);
+      this.$toast.info(`Peran ${user.name} diubah menjadi ${user.role}`);
     },
     toggleUserStatus(user) {
-      this.$toast.info(`Status ${user.name} diubah menjadi ${user.status === 'active' ? 'Aktif' : 'Nonaktif'}`);
+      this.$toast.info(`Status ${user.name} diubah menjadi ${user.status}`);
     },
     viewUserDetails(user) {
       this.$toast.info(`Melihat detail pengguna: ${user.name}`);
     }
+  },
+  mounted() {
+    this.fetchUsers();
   }
 }
 </script>
+
 
 <style scoped>
 /* Base Styles */
