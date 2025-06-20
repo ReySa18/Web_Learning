@@ -13,5 +13,7 @@ class Materi extends Model
         'judul',
         'deskripsi',
         'label',
+        'konten',
+        'gambar'
     ];
 }

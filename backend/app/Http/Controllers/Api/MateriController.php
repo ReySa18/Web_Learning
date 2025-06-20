@@ -20,9 +20,19 @@ class MateriController extends Controller
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'label' => 'required|string',
+            'konten' => 'nullable|string',
+            'gambar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
+        // Cek dan simpan file jika ada
+        if ($request->hasFile('gambar')) {
+            $path = $request->file('gambar')->store('materi_gambar', 'public');
+            $validated['gambar'] = $path; // simpan path ke DB
+        }
+
         $materi = Materi::create($validated);
+
         return response()->json($materi, 201);
     }
+
 }

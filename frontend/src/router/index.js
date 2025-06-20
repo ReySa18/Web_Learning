@@ -8,6 +8,8 @@ import Soal from '../views/Soal.vue'
 import Kelas from '../views/kelas.vue'
 import Admin from '../views/admin/admin.vue'
 import UserManagement from '../views/admin/user.vue'
+import InputMateri from '../views/admin/inputMateri.vue'
+import Materi from '../views/admin/materi.vue'
 
 const routes = [
   { path: '/', name: 'Login', component: Login },
@@ -16,6 +18,8 @@ const routes = [
   { path: '/kuis', name: 'Kuiz', component: Kuiz },
   { path: '/soal', name: 'Soal', component: Soal },
   { path: '/kelas', name: 'Kelas', component: Kelas },
+  { path: '/inputMateri', name: 'InputMateri', component: InputMateri },
+  { path: '/materi', name: 'Materi', component: Materi },
   { path: '/admin',
     name: 'admin',
     component: Admin,
