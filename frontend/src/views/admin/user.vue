@@ -39,7 +39,7 @@
             <span>Dashboard</span>
           </router-link>
           
-          <router-link to="/admin/users" class="nav-item active">
+          <router-link to="/usermanagement" class="nav-item active">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
               <circle cx="9" cy="7" r="4"></circle>
@@ -49,7 +49,7 @@
             <span>Manajemen User</span>
           </router-link>
           
-          <router-link to="/admin/materials" class="nav-item">
+          <router-link to="/materials" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
@@ -57,7 +57,7 @@
             <span>Manajemen Materi</span>
           </router-link>
           
-          <router-link to="/admin/questions" class="nav-item">
+          <router-link to="/questions" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -204,12 +204,7 @@
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   </svg>
                 </button>
-                <button class="icon-btn view" @click="viewUserDetails(user)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </button>
+
               </div>
             </div>
           </div>
@@ -410,6 +405,8 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
+
 
 export default {
   name: 'UserManagement',
@@ -494,6 +491,7 @@ export default {
   },
   methods: {
     async fetchUsers() {
+      const toast = useToast();
       try {
         const token = localStorage.getItem('auth_token');
         const response = await axios.get('http://localhost:8000/api/users', {
@@ -512,7 +510,7 @@ export default {
         }));
       } catch (error) {
         console.error('Gagal memuat user:', error);
-        this.$toast.error('Gagal memuat data pengguna dari server.');
+        toast.error('Gagal memuat data pengguna dari server.');
       }
     },
     getCurrentDate() {
@@ -557,8 +555,8 @@ export default {
       this.showAddUserModal = false;
     },
     openEditUserModal(user) {
-      this.editingUser = { ...user };
-      this.showEditUserModal = true;
+    this.editingUser = JSON.parse(JSON.stringify(user));
+    this.showEditUserModal = true;
     },
     closeEditUserModal() {
       this.showEditUserModal = false;
@@ -572,6 +570,7 @@ export default {
     async addNewUser() {
       try {
         const token = localStorage.getItem('auth_token');
+        const toast = useToast();
         
         // Gunakan endpoint yang benar sesuai route Laravel
         const response = await axios.post('http://localhost:8000/api/admin/users', {
@@ -597,7 +596,7 @@ export default {
         });
         
         this.showAddUserModal = false;
-        this.$toast.success('Pengguna berhasil ditambahkan');
+        toast.success('Pengguna berhasil ditambahkan');
       } catch (error) {
         console.error('Gagal tambah user:', error);
         
@@ -607,41 +606,88 @@ export default {
           // Tampilkan pesan error spesifik dari server
           if (error.response.data.errors) {
             const errors = Object.values(error.response.data.errors).flat();
-            this.$toast.error(errors.join(', ') || 'Gagal menambahkan pengguna.');
+            toast.error(errors.join(', ') || 'Gagal menambahkan pengguna.');
           } else {
-            this.$toast.error(error.response.data.message || 'Gagal menambahkan pengguna.');
+            toast.error(error.response.data.message || 'Gagal menambahkan pengguna.');
           }
         } else {
-          this.$toast.error('Terjadi kesalahan jaringan atau server.');
+          toast.error('Terjadi kesalahan jaringan atau server.');
         }
       }
     },
-    saveUserChanges() {
-      const index = this.users.findIndex(u => u.id === this.editingUser.id);
-      if (index !== -1) {
-        this.users[index] = { ...this.editingUser };
-        if (this.resetPassword) {
-          this.$toast.info('Password telah direset');
-          this.resetPassword = '';
+    async saveUserChanges() {
+      const toast = useToast();
+      const token = localStorage.getItem('auth_token');
+
+      const payload = {
+        name: this.editingUser.name,
+        email: this.editingUser.email,
+        role: this.editingUser.role,
+        ...(this.resetPassword ? { password: this.resetPassword } : {})
+      };
+
+      try {
+        await axios.put(
+          `http://localhost:8000/api/admin/users/${this.editingUser.id}`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        // Update array lokal
+        const index = this.users.findIndex(u => u.id === this.editingUser.id);
+        if (index !== -1) {
+          this.users[index] = {
+            ...this.users[index], 
+            ...this.editingUser, 
+          };
+        }
+
+        this.showEditUserModal = false;
+        this.resetPassword = '';
+        toast.success('Perubahan pengguna berhasil disimpan');
+      } catch (error) {
+        console.error('Gagal menyimpan perubahan:', error);
+
+        if (error.response?.data?.errors) {
+          const errors = Object.values(error.response.data.errors).flat();
+          toast.error(errors.join(', '));
+        } else {
+          toast.error(error.response?.data?.message || 'Terjadi kesalahan saat menyimpan perubahan');
         }
       }
-      this.showEditUserModal = false;
-      this.$toast.success('Perubahan berhasil disimpan');
     },
-    deleteUser() {
-      this.users = this.users.filter(user => user.id !== this.userToDelete.id);
-      this.showDeleteConfirmation = false;
-      this.$toast.info('Pengguna berhasil dihapus');
+
+    async deleteUser() {
+      const token = localStorage.getItem('auth_token');
+      const toast = useToast();
+      try {
+        const response = await axios.delete(`http://localhost:8000/api/users/${this.userToDelete.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        // Hapus dari daftar lokal
+        this.users = this.users.filter(user => user.id !== this.userToDelete.id);
+
+        this.showDeleteConfirmation = false;
+        toast.success('Pengguna berhasil dihapus');
+      } catch (error) {
+        console.error('Gagal menghapus user:', error);
+        toast.error('Gagal menghapus pengguna dari server.');
+      }
     },
     updateUserRole(user) {
-      this.$toast.info(`Peran ${user.name} diubah menjadi ${user.role}`);
+      toast.info(`Peran ${user.name} diubah menjadi ${user.role}`);
     },
     toggleUserStatus(user) {
-      this.$toast.info(`Status ${user.name} diubah menjadi ${user.status}`);
+      toast.info(`Status ${user.name} diubah menjadi ${user.status}`);
     },
-    viewUserDetails(user) {
-      this.$toast.info(`Melihat detail pengguna: ${user.name}`);
-    }
   },
   mounted() {
     this.fetchUsers();

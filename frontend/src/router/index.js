@@ -6,6 +6,7 @@ import Home from '../views/home.vue'
 import Kuiz from '../views/kuis.vue'
 import Soal from '../views/Soal.vue'
 import Kelas from '../views/kelas.vue'
+
 import Admin from '../views/admin/admin.vue'
 import UserManagement from '../views/admin/user.vue'
 import InputMateri from '../views/admin/inputMateri.vue'

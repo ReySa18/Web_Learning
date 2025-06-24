@@ -31,7 +31,7 @@
       <!-- Sidebar Navigation -->
       <div class="sidebar">
         <nav class="admin-nav">
-          <router-link to="/admin/dashboard" class="nav-item" :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">
+          <router-link to="/admin" class="nav-item" :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -49,7 +49,7 @@
             <span>Manajemen User</span>
           </router-link>
           
-          <router-link to="/admin/materials" class="nav-item" :class="{ active: activeTab === 'materials' }" @click="activeTab = 'materials'">
+          <router-link to="/materials" class="nav-item" :class="{ active: activeTab === 'materials' }" @click="activeTab = 'materials'">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
@@ -57,7 +57,7 @@
             <span>Manajemen Materi</span>
           </router-link>
           
-          <router-link to="/admin/questions" class="nav-item" :class="{ active: activeTab === 'questions' }" @click="activeTab = 'questions'">
+          <router-link to="/questions" class="nav-item" :class="{ active: activeTab === 'questions' }" @click="activeTab = 'questions'">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
