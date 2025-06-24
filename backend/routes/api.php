@@ -31,3 +31,8 @@ Route::get('/materi', [MateriController::class, 'index']);
 Route::post('/materi', [MateriController::class, 'store']);
 
 Route::get('/users', [UserController::class, 'index']);
+
+Route::middleware(['auth:sanctum'])->delete('/users/{id}', [UserController::class, 'destroy']);
+
+Route::middleware('auth:sanctum')->put('/admin/users/{id}', [UserController::class, 'update']);
+
