@@ -353,88 +353,7 @@ export default {
         draft: 'Draft',
         archived: 'Diarsipkan'
       },
-      materials: [
-        {
-          id: 'MAT001',
-          title: 'Dasar Pemrograman JavaScript',
-          category: 'Pemrograman',
-          createdAt: '12 Jan 2023',
-          status: 'published',
-          author: 'Budi Santoso'
-        },
-        {
-          id: 'MAT002',
-          title: 'Pengenalan UI/UX Design',
-          category: 'Desain',
-          createdAt: '15 Feb 2023',
-          status: 'published',
-          author: 'Anita Wijaya'
-        },
-        {
-          id: 'MAT003',
-          title: 'Manajemen Keuangan untuk Startup',
-          category: 'Bisnis',
-          createdAt: '3 Mar 2023',
-          status: 'draft',
-          author: 'Dewi Anggraini'
-        },
-        {
-          id: 'MAT004',
-          title: 'Belajar Grammar Bahasa Inggris',
-          category: 'Bahasa',
-          createdAt: '20 Apr 2023',
-          status: 'published',
-          author: 'Rudi Hartono'
-        },
-        {
-          id: 'MAT005',
-          title: 'Algoritma dan Struktur Data',
-          category: 'Pemrograman',
-          createdAt: '5 Mei 2023',
-          status: 'published',
-          author: 'Eko Prasetyo'
-        },
-        {
-          id: 'MAT006',
-          title: 'Dasar-dasar Photoshop',
-          category: 'Desain',
-          createdAt: '17 Jun 2023',
-          status: 'draft',
-          author: 'Siti Rahayu'
-        },
-        {
-          id: 'MAT007',
-          title: 'Strategi Pemasaran Digital',
-          category: 'Bisnis',
-          createdAt: '8 Jul 2023',
-          status: 'published',
-          author: 'Hendra Kurniawan'
-        },
-        {
-          id: 'MAT008',
-          title: 'Kalkulus Dasar',
-          category: 'Matematika',
-          createdAt: '22 Agu 2023',
-          status: 'archived',
-          author: 'Agus Setiawan'
-        },
-        {
-          id: 'MAT009',
-          title: 'Fisika Modern',
-          category: 'Sains',
-          createdAt: '14 Sep 2023',
-          status: 'published',
-          author: 'Dian Permatasari'
-        },
-        {
-          id: 'MAT010',
-          title: 'Pemrograman Python Lanjutan',
-          category: 'Pemrograman',
-          createdAt: '30 Okt 2023',
-          status: 'draft',
-          author: 'Rizky Maulana'
-        }
-      ]
+      materials: []
     };
   },
   computed: {
@@ -489,93 +408,122 @@ export default {
       return this.filteredMaterials.slice(start, end);
     }
   },
-  methods: {
-    openAddMaterialModal() {
-      this.newMaterial = {
-        id: '',
-        title: '',
-        category: '',
-        createdAt: this.getCurrentDate(),
-        status: 'draft',
-        author: 'Admin User'
-      };
-      this.showAddMaterialModal = true;
-    },
-    closeAddMaterialModal() {
-      this.showAddMaterialModal = false;
-    },
-    openEditMaterialModal(material) {
-      this.editingMaterial = { ...material };
-      this.showEditMaterialModal = true;
-    },
-    closeEditMaterialModal() {
-      this.showEditMaterialModal = false;
-    },
-    confirmDeleteMaterial(material) {
-      this.materialToDelete = { ...material };
-      this.showDeleteConfirmation = true;
-    },
-    getCurrentDate() {
-      const now = new Date();
-      return now.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
+methods: {
+  async fetchMaterials() {
+    try {
+      const response = await fetch('http://localhost:8000/api/materi', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}` // sesuaikan jika pakai auth
+        }
       });
-    },
-    addNewMaterial() {
-      // Generate unique ID
-      const newId = 'MAT' + String(this.materials.length + 1).padStart(3, '0');
-      
-      // Add new material
-      const newMat = {
-        ...this.newMaterial,
-        id: newId
-      };
-      
-      this.materials.unshift(newMat);
-      this.closeAddMaterialModal();
-      
-      // Show success toast
-      this.toast.success(`Materi "${newMat.title}" berhasil ditambahkan`, {
+      const data = await response.json();
+
+      // Konversi nama key agar cocok dengan komponen kamu
+      this.materials = data.map(item => ({
+        id: item.id,
+        title: item.judul,
+        category: item.label,
+        createdAt: this.formatDate(item.created_at),
+        status: 'published', // Sesuaikan kalau ada status di DB
+        author: item.author?.name || 'Tidak diketahui'
+      }));
+    } catch (error) {
+      this.toast.error('Gagal memuat materi dari server');
+      console.error(error);
+    }
+  },
+
+  formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  },
+
+  openAddMaterialModal() {
+    this.newMaterial = {
+      id: '',
+      title: '',
+      category: '',
+      createdAt: this.getCurrentDate(),
+      status: 'draft',
+      author: 'Admin User'
+    };
+    this.showAddMaterialModal = true;
+  },
+  closeAddMaterialModal() {
+    this.showAddMaterialModal = false;
+  },
+  openEditMaterialModal(material) {
+    this.editingMaterial = { ...material };
+    this.showEditMaterialModal = true;
+  },
+  closeEditMaterialModal() {
+    this.showEditMaterialModal = false;
+  },
+  confirmDeleteMaterial(material) {
+    this.materialToDelete = { ...material };
+    this.showDeleteConfirmation = true;
+  },
+  getCurrentDate() {
+    const now = new Date();
+    return now.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  },
+  addNewMaterial() {
+    const newId = 'MAT' + String(this.materials.length + 1).padStart(3, '0');
+
+    const newMat = {
+      ...this.newMaterial,
+      id: newId
+    };
+
+    this.materials.unshift(newMat);
+    this.closeAddMaterialModal();
+
+    this.toast.success(`Materi "${newMat.title}" berhasil ditambahkan`, {
+      timeout: 3000,
+      position: 'top-right'
+    });
+  },
+  saveMaterialChanges() {
+    const index = this.materials.findIndex(m => m.id === this.editingMaterial.id);
+
+    if (index !== -1) {
+      this.materials[index] = { ...this.editingMaterial };
+      this.closeEditMaterialModal();
+
+      this.toast.success(`Perubahan materi "${this.editingMaterial.title}" berhasil disimpan`, {
         timeout: 3000,
         position: 'top-right'
       });
-    },
-    saveMaterialChanges() {
-      // Find index of edited material
-      const index = this.materials.findIndex(m => m.id === this.editingMaterial.id);
-      
-      if (index !== -1) {
-        // Update material
-        this.materials[index] = { ...this.editingMaterial };
-        this.closeEditMaterialModal();
-        
-        // Show success toast
-        this.toast.success(`Perubahan materi "${this.editingMaterial.title}" berhasil disimpan`, {
-          timeout: 3000,
-          position: 'top-right'
-        });
-      }
-    },
-    deleteMaterial() {
-      // Find index of material to delete
-      const index = this.materials.findIndex(m => m.id === this.materialToDelete.id);
-      
-      if (index !== -1) {
-        const deletedTitle = this.materialToDelete.title;
-        // Remove material
-        this.materials.splice(index, 1);
-        this.showDeleteConfirmation = false;
-        
-        // Show success toast
-        this.toast.success(`Materi "${deletedTitle}" berhasil dihapus`, {
-          timeout: 3000,
-          position: 'top-right'
-        });
-      }
+    }
+  },
+  deleteMaterial() {
+    const index = this.materials.findIndex(m => m.id === this.materialToDelete.id);
+
+    if (index !== -1) {
+      const deletedTitle = this.materialToDelete.title;
+      this.materials.splice(index, 1);
+      this.showDeleteConfirmation = false;
+
+      this.toast.success(`Materi "${deletedTitle}" berhasil dihapus`, {
+        timeout: 3000,
+        position: 'top-right'
+      });
     }
   }
+},
+
+mounted() {
+  this.fetchMaterials();
+}
+
 }
 </script>
 

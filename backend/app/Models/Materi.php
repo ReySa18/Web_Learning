@@ -14,6 +14,13 @@ class Materi extends Model
         'deskripsi',
         'label',
         'konten',
-        'gambar'
+        'gambar',
+        'author_id'
     ];
+
+        // Relasi ke tabel users (author)
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 }

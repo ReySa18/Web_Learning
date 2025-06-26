@@ -8,12 +8,15 @@ use App\Models\Materi;
 
 class MateriController extends Controller
 {
+    // GET /api/materis
     public function index()
     {
-        $materi = Materi::all(); // atau paginate()
-        return response()->json($materi);
+        // Ambil materi + relasi author
+        $materis = Materi::with('author')->get();
+        return response()->json($materis);
     }
 
+    // POST /api/materis
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -24,15 +27,17 @@ class MateriController extends Controller
             'gambar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        // Cek dan simpan file jika ada
+        // Simpan gambar jika ada
         if ($request->hasFile('gambar')) {
             $path = $request->file('gambar')->store('materi_gambar', 'public');
-            $validated['gambar'] = $path; // simpan path ke DB
+            $validated['gambar'] = $path;
         }
+
+        // Tambahkan author_id dari user yang login
+        $validated['author_id'] = $request->user()->id;
 
         $materi = Materi::create($validated);
 
         return response()->json($materi, 201);
     }
-
 }
