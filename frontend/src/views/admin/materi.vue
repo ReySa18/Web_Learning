@@ -39,7 +39,7 @@
             <span>Dashboard</span>
           </router-link>
           
-          <router-link to="/admin/users" class="nav-item">
+          <router-link to="/usermanagement" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
               <circle cx="9" cy="7" r="4"></circle>
@@ -49,7 +49,7 @@
             <span>Manajemen User</span>
           </router-link>
           
-          <router-link to="/admin/materials" class="nav-item active">
+          <router-link to="/materials" class="nav-item active">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
@@ -57,7 +57,7 @@
             <span>Manajemen Materi</span>
           </router-link>
           
-          <router-link to="/admin/questions" class="nav-item">
+          <router-link to="/questions" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -101,10 +101,7 @@
               <label>Kategori:</label>
               <select v-model="categoryFilter">
                 <option value="all">Semua Kategori</option>
-                <option value="matematika">Matematika</option>
-                <option value="fisika">Fisika</option>
-                <option value="kimia">Kimia</option>
-                <option value="biologi">Biologi</option>
+                <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
               </select>
             </div>
             
@@ -112,8 +109,9 @@
               <label>Status:</label>
               <select v-model="statusFilter">
                 <option value="all">Semua Status</option>
-                <option value="published">Diterbitkan</option>
+                <option value="published">Dipublikasikan</option>
                 <option value="draft">Draft</option>
+                <option value="archived">Diarsipkan</option>
               </select>
             </div>
             
@@ -122,7 +120,7 @@
               <select v-model="sortBy">
                 <option value="recent">Terbaru</option>
                 <option value="oldest">Terlama</option>
-                <option value="title_asc">Judul (A-Z)</option>
+                <option value="title">Judul (A-Z)</option>
                 <option value="title_desc">Judul (Z-A)</option>
               </select>
             </div>
@@ -135,7 +133,7 @@
             </div>
             <div class="stat-item">
               <span class="stat-value">{{ publishedCount }}</span>
-              <span class="stat-label">Diterbitkan</span>
+              <span class="stat-label">Dipublikasikan</span>
             </div>
             <div class="stat-item">
               <span class="stat-value">{{ draftCount }}</span>
@@ -150,9 +148,9 @@
             <div class="table-row">
               <div class="table-cell">Judul Materi</div>
               <div class="table-cell">Kategori</div>
-              <div class="table-cell">Label</div>
-              <div class="table-cell">Status</div>
               <div class="table-cell">Tanggal Dibuat</div>
+              <div class="table-cell">Status</div>
+              <div class="table-cell">Penulis</div>
               <div class="table-cell">Aksi</div>
             </div>
           </div>
@@ -160,43 +158,37 @@
           <div class="table-body">
             <div v-for="material in paginatedMaterials" :key="material.id" class="table-row">
               <div class="table-cell">
-                <div class="material-info">
+                <div class="user-info">
                   <div class="material-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
                   </div>
                   <div>
-                    <div class="material-title">{{ material.title }}</div>
-                    <div class="material-id">ID: {{ material.id }}</div>
+                    <div class="user-name">{{ material.title }}</div>
+                    <div class="user-id">ID: {{ material.id }}</div>
                   </div>
                 </div>
               </div>
               <div class="table-cell">
-                <div class="material-category">{{ formatCategory(material.category) }}</div>
+                <div class="user-email">{{ material.category }}</div>
               </div>
               <div class="table-cell">
-                <div class="material-labels">
-                  <span v-for="(label, index) in material.labels" :key="index" class="label-badge">
-                    {{ label }}
-                  </span>
-                </div>
+                <div class="join-date">{{ material.createdAt }}</div>
               </div>
               <div class="table-cell">
                 <div class="status-container">
-                  <label class="switch">
-                    <input type="checkbox" v-model="material.status" true-value="published" false-value="draft" @change="toggleMaterialStatus(material)">
-                    <span class="slider"></span>
-                  </label>
                   <span :class="['status-badge', material.status]">
-                    {{ material.status === 'published' ? 'Diterbitkan' : 'Draft' }}
+                    {{ statusLabels[material.status] }}
                   </span>
                 </div>
               </div>
               <div class="table-cell">
-                <div class="create-date">{{ material.createdDate }}</div>
-                <div class="update-date" v-if="material.updatedDate">Diubah: {{ material.updatedDate }}</div>
+                <div class="user-email">{{ material.author }}</div>
               </div>
               <div class="table-cell actions">
                 <button class="icon-btn edit" @click="openEditMaterialModal(material)">
@@ -209,12 +201,6 @@
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-                <button class="icon-btn view" @click="viewMaterialDetails(material)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
                   </svg>
                 </button>
               </div>
@@ -246,42 +232,8 @@
       </div>
     </div>
     
-    <!-- Add Material Modal - Step 1 (Label Selection) -->
-    <div v-if="showAddMaterialModal && showLabelStep" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Pilih Label Materi</h3>
-          <button class="close-btn" @click="closeAddMaterialModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Pilih Label:</label>
-            <div class="label-selection">
-              <div v-for="label in availableLabels" :key="label" 
-                   class="label-option" 
-                   :class="{ selected: newMaterial.labels.includes(label) }"
-                   @click="toggleMaterialLabel(label)">
-                {{ label }}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="closeAddMaterialModal">Batal</button>
-          <button class="btn-save" @click="proceedToFormStep">Lanjutkan</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Add Material Modal - Step 2 (Form Input) -->
-    <div v-if="showAddMaterialModal && showFormStep" class="modal-overlay">
+    <!-- Add Material Modal -->
+    <div v-if="showAddMaterialModal" class="modal-overlay">
       <div class="modal">
         <div class="modal-header">
           <h3>Tambah Materi Baru</h3>
@@ -294,50 +246,12 @@
         </div>
         
         <div class="modal-body">
-          <div class="form-group">
-            <label>Judul Materi</label>
-            <input type="text" v-model="newMaterial.title" placeholder="Masukkan judul materi">
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label>Kategori</label>
-              <select v-model="newMaterial.category">
-                <option value="matematika">Matematika</option>
-                <option value="fisika">Fisika</option>
-                <option value="kimia">Kimia</option>
-                <option value="biologi">Biologi</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Status</label>
-              <select v-model="newMaterial.status">
-                <option value="published">Diterbitkan</option>
-                <option value="draft">Draft</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Label Terpilih:</label>
-            <div class="selected-labels">
-              <span v-for="(label, index) in newMaterial.labels" :key="index" class="label-badge">
-                {{ label }}
-                <span @click="removeMaterialLabel(label)" class="remove-label">×</span>
-              </span>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Konten Materi</label>
-            <textarea v-model="newMaterial.content" placeholder="Masukkan konten materi" rows="5"></textarea>
-          </div>
+          <p class="placeholder-text">Formulir penambahan materi akan ditampilkan di sini.</p>
         </div>
         
         <div class="modal-footer">
-          <button class="btn-cancel" @click="backToLabelStep">Kembali</button>
-          <button class="btn-save" @click="addNewMaterial">Simpan Materi</button>
+          <button class="btn-cancel" @click="closeAddMaterialModal">Batal</button>
+          <button class="btn-save" @click="addNewMaterial">Simpan</button>
         </div>
       </div>
     </div>
@@ -356,11 +270,14 @@
         </div>
         
         <div class="modal-body">
-          <div class="material-header">
+          <div class="user-header">
             <div class="material-icon large">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
               </svg>
             </div>
             <div>
@@ -369,47 +286,7 @@
             </div>
           </div>
           
-          <div class="form-group">
-            <label>Judul Materi</label>
-            <input type="text" v-model="editingMaterial.title">
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label>Kategori</label>
-              <select v-model="editingMaterial.category">
-                <option value="matematika">Matematika</option>
-                <option value="fisika">Fisika</option>
-                <option value="kimia">Kimia</option>
-                <option value="biologi">Biologi</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Status</label>
-              <select v-model="editingMaterial.status">
-                <option value="published">Diterbitkan</option>
-                <option value="draft">Draft</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Label:</label>
-            <div class="label-selection">
-              <div v-for="label in availableLabels" :key="label" 
-                   class="label-option" 
-                   :class="{ selected: editingMaterial.labels.includes(label) }"
-                   @click="toggleEditMaterialLabel(label)">
-                {{ label }}
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Konten Materi</label>
-            <textarea v-model="editingMaterial.content" rows="5"></textarea>
-          </div>
+          <p class="placeholder-text">Formulir pengeditan materi akan ditampilkan di sini.</p>
         </div>
         
         <div class="modal-footer">
@@ -441,10 +318,14 @@
 </template>
 
 <script>
-import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'MaterialManagement',
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       searchQuery: '',
@@ -456,121 +337,102 @@ export default {
       showAddMaterialModal: false,
       showEditMaterialModal: false,
       showDeleteConfirmation: false,
-      showLabelStep: true,
-      showFormStep: false,
-      availableLabels: ['Pemula', 'Menengah', 'Lanjutan', 'Teori', 'Praktik', 'Latihan', 'Evaluasi'],
       newMaterial: {
         id: '',
         title: '',
-        category: 'matematika',
-        labels: [],
-        content: '',
-        status: 'published',
-        createdDate: this.getCurrentDate(),
-        updatedDate: ''
+        category: '',
+        createdAt: '',
+        status: 'draft',
+        author: ''
       },
       editingMaterial: {},
       materialToDelete: {},
+      categories: ['Pemrograman', 'Desain', 'Bisnis', 'Bahasa', 'Matematika', 'Sains'],
+      statusLabels: {
+        published: 'Dipublikasikan',
+        draft: 'Draft',
+        archived: 'Diarsipkan'
+      },
       materials: [
         {
-          id: 'MAT-001',
-          title: 'Aljabar Dasar',
-          category: 'matematika',
-          labels: ['Pemula', 'Teori'],
-          content: 'Konsep dasar aljabar untuk pemula...',
+          id: 'MAT001',
+          title: 'Dasar Pemrograman JavaScript',
+          category: 'Pemrograman',
+          createdAt: '12 Jan 2023',
           status: 'published',
-          createdDate: '10 Mei 2024',
-          updatedDate: '15 Mei 2024'
+          author: 'Budi Santoso'
         },
         {
-          id: 'MAT-002',
-          title: 'Hukum Newton',
-          category: 'fisika',
-          labels: ['Menengah', 'Teori', 'Latihan'],
-          content: 'Penjelasan tiga hukum Newton dalam fisika...',
+          id: 'MAT002',
+          title: 'Pengenalan UI/UX Design',
+          category: 'Desain',
+          createdAt: '15 Feb 2023',
           status: 'published',
-          createdDate: '12 Mei 2024',
-          updatedDate: '14 Mei 2024'
+          author: 'Anita Wijaya'
         },
         {
-          id: 'MAT-003',
-          title: 'Stoikiometri',
-          category: 'kimia',
-          labels: ['Menengah', 'Praktik'],
-          content: 'Perhitungan kimia dasar dalam stoikiometri...',
+          id: 'MAT003',
+          title: 'Manajemen Keuangan untuk Startup',
+          category: 'Bisnis',
+          createdAt: '3 Mar 2023',
           status: 'draft',
-          createdDate: '15 Mei 2024',
-          updatedDate: ''
+          author: 'Dewi Anggraini'
         },
         {
-          id: 'MAT-004',
-          title: 'Sel dan Jaringan',
-          category: 'biologi',
-          labels: ['Pemula', 'Teori'],
-          content: 'Pengenalan struktur sel dan jaringan makhluk hidup...',
+          id: 'MAT004',
+          title: 'Belajar Grammar Bahasa Inggris',
+          category: 'Bahasa',
+          createdAt: '20 Apr 2023',
           status: 'published',
-          createdDate: '8 Mei 2024',
-          updatedDate: '10 Mei 2024'
+          author: 'Rudi Hartono'
         },
         {
-          id: 'MAT-005',
-          title: 'Trigonometri',
-          category: 'matematika',
-          labels: ['Menengah', 'Latihan'],
-          content: 'Konsep trigonometri dan penerapannya...',
+          id: 'MAT005',
+          title: 'Algoritma dan Struktur Data',
+          category: 'Pemrograman',
+          createdAt: '5 Mei 2023',
           status: 'published',
-          createdDate: '5 Mei 2024',
-          updatedDate: '7 Mei 2024'
+          author: 'Eko Prasetyo'
         },
         {
-          id: 'MAT-006',
-          title: 'Termodinamika',
-          category: 'fisika',
-          labels: ['Lanjutan', 'Teori'],
-          content: 'Prinsip dasar termodinamika dan hukum-hukumnya...',
+          id: 'MAT006',
+          title: 'Dasar-dasar Photoshop',
+          category: 'Desain',
+          createdAt: '17 Jun 2023',
           status: 'draft',
-          createdDate: '18 Mei 2024',
-          updatedDate: ''
+          author: 'Siti Rahayu'
         },
         {
-          id: 'MAT-007',
-          title: 'Reaksi Redoks',
-          category: 'kimia',
-          labels: ['Menengah', 'Praktik', 'Evaluasi'],
-          content: 'Konsep reaksi reduksi-oksidasi dalam kimia...',
+          id: 'MAT007',
+          title: 'Strategi Pemasaran Digital',
+          category: 'Bisnis',
+          createdAt: '8 Jul 2023',
           status: 'published',
-          createdDate: '3 Mei 2024',
-          updatedDate: '5 Mei 2024'
+          author: 'Hendra Kurniawan'
         },
         {
-          id: 'MAT-008',
-          title: 'Genetika Dasar',
-          category: 'biologi',
-          labels: ['Menengah', 'Teori'],
-          content: 'Pengantar genetika dan pewarisan sifat...',
+          id: 'MAT008',
+          title: 'Kalkulus Dasar',
+          category: 'Matematika',
+          createdAt: '22 Agu 2023',
+          status: 'archived',
+          author: 'Agus Setiawan'
+        },
+        {
+          id: 'MAT009',
+          title: 'Fisika Modern',
+          category: 'Sains',
+          createdAt: '14 Sep 2023',
           status: 'published',
-          createdDate: '20 Mei 2024',
-          updatedDate: '21 Mei 2024'
+          author: 'Dian Permatasari'
         },
         {
-          id: 'MAT-009',
-          title: 'Kalkulus Diferensial',
-          category: 'matematika',
-          labels: ['Lanjutan', 'Teori'],
-          content: 'Dasar-dasar kalkulus diferensial dan aplikasinya...',
+          id: 'MAT010',
+          title: 'Pemrograman Python Lanjutan',
+          category: 'Pemrograman',
+          createdAt: '30 Okt 2023',
           status: 'draft',
-          createdDate: '22 Mei 2024',
-          updatedDate: ''
-        },
-        {
-          id: 'MAT-010',
-          title: 'Optika Geometri',
-          category: 'fisika',
-          labels: ['Menengah', 'Praktik'],
-          content: 'Studi tentang cahaya dan sifat-sifatnya...',
-          status: 'published',
-          createdDate: '19 Mei 2024',
-          updatedDate: '20 Mei 2024'
+          author: 'Rizky Maulana'
         }
       ]
     };
@@ -579,31 +441,35 @@ export default {
     filteredMaterials() {
       let filtered = this.materials;
 
+      // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(material =>
-          material.title.toLowerCase().includes(query) ||
-          material.content.toLowerCase().includes(query) ||
-          material.labels.some(label => label.toLowerCase().includes(query))
+        filtered = filtered.filter(material => 
+          material.title.toLowerCase().includes(query) || 
+          material.category.toLowerCase().includes(query) ||
+          material.author.toLowerCase().includes(query)
         );
       }
 
+      // Filter by category
       if (this.categoryFilter !== 'all') {
         filtered = filtered.filter(material => material.category === this.categoryFilter);
       }
 
+      // Filter by status
       if (this.statusFilter !== 'all') {
         filtered = filtered.filter(material => material.status === this.statusFilter);
       }
 
-      if (this.sortBy === 'title_asc') {
+      // Sorting
+      if (this.sortBy === 'recent') {
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else if (this.sortBy === 'oldest') {
+        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      } else if (this.sortBy === 'title') {
         filtered.sort((a, b) => a.title.localeCompare(b.title));
       } else if (this.sortBy === 'title_desc') {
         filtered.sort((a, b) => b.title.localeCompare(a.title));
-      } else if (this.sortBy === 'recent') {
-        filtered.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
-      } else if (this.sortBy === 'oldest') {
-        filtered.sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
       }
 
       return filtered;
@@ -624,69 +490,19 @@ export default {
     }
   },
   methods: {
-    getCurrentDate() {
-      const now = new Date();
-      return now.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-    },
-    formatCategory(category) {
-      const categories = {
-        matematika: 'Matematika',
-        fisika: 'Fisika',
-        kimia: 'Kimia',
-        biologi: 'Biologi'
-      };
-      return categories[category] || category;
-    },
     openAddMaterialModal() {
       this.newMaterial = {
-        id: 'MAT-' + Math.floor(1000 + Math.random() * 9000),
+        id: '',
         title: '',
-        category: 'matematika',
-        labels: [],
-        content: '',
-        status: 'published',
-        createdDate: this.getCurrentDate(),
-        updatedDate: ''
+        category: '',
+        createdAt: this.getCurrentDate(),
+        status: 'draft',
+        author: 'Admin User'
       };
-      this.showLabelStep = true;
-      this.showFormStep = false;
       this.showAddMaterialModal = true;
     },
     closeAddMaterialModal() {
       this.showAddMaterialModal = false;
-    },
-    proceedToFormStep() {
-      if (this.newMaterial.labels.length > 0) {
-        this.showLabelStep = false;
-        this.showFormStep = true;
-      } else {
-        this.$toast.warning('Pilih setidaknya satu label untuk materi');
-      }
-    },
-    backToLabelStep() {
-      this.showLabelStep = true;
-      this.showFormStep = false;
-    },
-    toggleMaterialLabel(label) {
-      if (this.newMaterial.labels.includes(label)) {
-        this.newMaterial.labels = this.newMaterial.labels.filter(l => l !== label);
-      } else {
-        this.newMaterial.labels.push(label);
-      }
-    },
-    toggleEditMaterialLabel(label) {
-      if (this.editingMaterial.labels.includes(label)) {
-        this.editingMaterial.labels = this.editingMaterial.labels.filter(l => l !== label);
-      } else {
-        this.editingMaterial.labels.push(label);
-      }
-    },
-    removeMaterialLabel(label) {
-      this.newMaterial.labels = this.newMaterial.labels.filter(l => l !== label);
     },
     openEditMaterialModal(material) {
       this.editingMaterial = { ...material };
@@ -699,174 +515,71 @@ export default {
       this.materialToDelete = { ...material };
       this.showDeleteConfirmation = true;
     },
+    getCurrentDate() {
+      const now = new Date();
+      return now.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    },
     addNewMaterial() {
-      this.materials.unshift({ ...this.newMaterial });
-      this.showAddMaterialModal = false;
-      this.$toast.success('Materi berhasil ditambahkan');
+      // Generate unique ID
+      const newId = 'MAT' + String(this.materials.length + 1).padStart(3, '0');
+      
+      // Add new material
+      const newMat = {
+        ...this.newMaterial,
+        id: newId
+      };
+      
+      this.materials.unshift(newMat);
+      this.closeAddMaterialModal();
+      
+      // Show success toast
+      this.toast.success(`Materi "${newMat.title}" berhasil ditambahkan`, {
+        timeout: 3000,
+        position: 'top-right'
+      });
     },
     saveMaterialChanges() {
+      // Find index of edited material
       const index = this.materials.findIndex(m => m.id === this.editingMaterial.id);
+      
       if (index !== -1) {
-        this.materials[index] = { 
-          ...this.editingMaterial,
-          updatedDate: this.getCurrentDate()
-        };
+        // Update material
+        this.materials[index] = { ...this.editingMaterial };
+        this.closeEditMaterialModal();
+        
+        // Show success toast
+        this.toast.success(`Perubahan materi "${this.editingMaterial.title}" berhasil disimpan`, {
+          timeout: 3000,
+          position: 'top-right'
+        });
       }
-      this.showEditMaterialModal = false;
-      this.$toast.success('Perubahan materi berhasil disimpan');
     },
     deleteMaterial() {
-      this.materials = this.materials.filter(material => material.id !== this.materialToDelete.id);
-      this.showDeleteConfirmation = false;
-      this.$toast.info('Materi berhasil dihapus');
-    },
-    toggleMaterialStatus(material) {
-      this.$toast.info(`Status materi "${material.title}" diubah menjadi ${material.status === 'published' ? 'Diterbitkan' : 'Draft'}`);
-    },
-    viewMaterialDetails(material) {
-      this.$toast.info(`Melihat detail materi: ${material.title}`);
+      // Find index of material to delete
+      const index = this.materials.findIndex(m => m.id === this.materialToDelete.id);
+      
+      if (index !== -1) {
+        const deletedTitle = this.materialToDelete.title;
+        // Remove material
+        this.materials.splice(index, 1);
+        this.showDeleteConfirmation = false;
+        
+        // Show success toast
+        this.toast.success(`Materi "${deletedTitle}" berhasil dihapus`, {
+          timeout: 3000,
+          position: 'top-right'
+        });
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-/* Custom styles for Material Management */
-.material-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.material-icon {
-  width: 40px;
-  height: 40px;
-  background: #f0f7ff;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #4a00e0;
-}
-
-.material-icon.large {
-  width: 50px;
-  height: 50px;
-}
-
-.material-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.material-icon.large svg {
-  width: 28px;
-  height: 28px;
-}
-
-.material-title {
-  font-weight: 500;
-}
-
-.material-id {
-  font-size: 12px;
-  color: #777;
-}
-
-.material-category {
-  font-weight: 500;
-  padding: 5px 12px;
-  background: #f0f7ff;
-  border-radius: 20px;
-  display: inline-block;
-  color: #4a00e0;
-}
-
-.material-labels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.label-badge {
-  padding: 4px 10px;
-  background: #f0f7ff;
-  border-radius: 20px;
-  font-size: 12px;
-  color: #4a00e0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.remove-label {
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.label-selection {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 5px;
-}
-
-.label-option {
-  padding: 8px 15px;
-  background: #f5f7fa;
-  border-radius: 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.label-option:hover {
-  background: #eef2f7;
-}
-
-.label-option.selected {
-  background: #4a00e0;
-  color: white;
-}
-
-.selected-labels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 5px;
-}
-
-.material-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.material-header h4 {
-  font-size: 18px;
-  margin-bottom: 5px;
-}
-
-textarea {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  resize: vertical;
-  min-height: 100px;
-  transition: all 0.3s ease;
-}
-
-textarea:focus {
-  border-color: #8e2de2;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
-}
-
 /* Base Styles */
 .admin-dashboard {
   display: flex;
@@ -876,4 +589,976 @@ textarea:focus {
   font-family: 'Inter', sans-serif;
 }
 
+/* Top Navigation */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4a00e0, #8e2de2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.logo-container h1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.notification {
+  position: relative;
+  cursor: pointer;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4757;
+  color: white;
+  font-size: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.admin-role {
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* Main Content */
+.main-content {
+  display: flex;
+  flex: 1;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: #1a1a1a;
+  color: white;
+  padding: 20px 0;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  z-index: 90;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 15px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border-radius: 8px;
+  color: #ddd;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  gap: 12px;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #4a00e0, #8e2de2);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(74, 0, 224, 0.3);
+}
+
+/* Content Area */
+.content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.section-subtitle {
+  color: #666;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-container input {
+  padding: 10px 15px 10px 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 250px;
+  transition: all 0.3s ease;
+}
+
+.search-container input:focus {
+  border-color: #8e2de2;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
+}
+
+.search-container svg {
+  position: absolute;
+  left: 15px;
+  color: #777;
+}
+
+/* Buttons */
+.primary-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #4a00e0, #8e2de2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(142, 45, 226, 0.3);
+}
+
+/* Filters and Stats */
+.filters-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.filter-group select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.user-stats {
+  display: flex;
+  gap: 20px;
+  background: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.stat-item:not(:last-child) {
+  border-right: 1px solid #eee;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #4a00e0;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #777;
+}
+
+/* Users Table */
+.users-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px;
+}
+
+.table-header {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1.5fr 1fr;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.table-body .table-row:hover {
+  background: #fafbff;
+}
+
+.table-cell {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info .avatar {
+  width: 40px;
+  height: 40px;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.user-id {
+  font-size: 12px;
+  color: #777;
+}
+
+.user-email {
+  font-weight: 500;
+}
+
+.user-phone {
+  font-size: 12px;
+  color: #777;
+  margin-top: 3px;
+}
+
+.role-select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.role-select:hover {
+  border-color: #8e2de2;
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2ecc71;
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.status-badge.inactive {
+  background: rgba(255, 71, 87, 0.1);
+  color: #ff4757;
+}
+
+.join-date {
+  font-weight: 500;
+}
+
+.last-login {
+  font-size: 12px;
+  color: #777;
+  margin-top: 3px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.icon-btn.edit {
+  color: #3498db;
+}
+
+.icon-btn.edit:hover {
+  background: rgba(52, 152, 219, 0.1);
+}
+
+.icon-btn.delete {
+  color: #e74c3c;
+}
+
+.icon-btn.delete:hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.icon-btn.view {
+  color: #9b59b6;
+}
+
+.icon-btn.view:hover {
+  background: rgba(155, 89, 182, 0.1);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.pagination-btn:hover {
+  border-color: #8e2de2;
+  color: #8e2de2;
+}
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, #4a00e0, #8e2de2);
+  color: white;
+  border-color: #8e2de2;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.confirmation-modal {
+  background: white;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.user-header .avatar {
+  width: 60px;
+  height: 60px;
+}
+
+.user-header h4 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.user-header p {
+  color: #777;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-group input, 
+.form-group select {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+  border-color: #8e2de2;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.warning-text {
+  color: #e74c3c;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+}
+
+.btn-cancel, .btn-delete, .btn-save {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.btn-cancel {
+  background: #f5f7fa;
+  border: 1px solid #ddd;
+  color: #555;
+}
+
+.btn-cancel:hover {
+  background: #eef2f7;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #4a00e0, #8e2de2);
+  border: none;
+  color: white;
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(142, 45, 226, 0.3);
+}
+
+.btn-delete {
+  background: #ff4757;
+  border: none;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #ff2e43;
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+  .table-row {
+    grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
+  }
+  
+  .table-cell:last-child {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    width: 70px;
+  }
+  
+  .nav-item span {
+    display: none;
+  }
+  
+  .nav-item {
+    justify-content: center;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .actions {
+    width: 100%;
+  }
+  
+  .search-container input {
+    width: 100%;
+  }
+  
+  .filters-stats {
+    flex-direction: column;
+  }
+  
+  .table-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "user user"
+      "email role"
+      "status date"
+      "actions actions";
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .table-cell:nth-child(1) {
+    grid-area: user;
+  }
+  
+  .table-cell:nth-child(2) {
+    grid-area: email;
+  }
+  
+  .table-cell:nth-child(3) {
+    grid-area: role;
+  }
+  
+  .table-cell:nth-child(4) {
+    grid-area: status;
+  }
+  
+  .table-cell:nth-child(5) {
+    grid-area: date;
+  }
+  
+  .table-cell:nth-child(6) {
+    grid-area: actions;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 10px 0;
+  }
+  
+  .admin-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 10px;
+  }
+  
+  .nav-item {
+    padding: 10px 15px;
+    white-space: nowrap;
+  }
+  
+  .content {
+    padding: 20px;
+  }
+  
+  .top-nav {
+    padding: 15px;
+  }
+  
+  .logo-container h1 {
+    font-size: 16px;
+  }
+  
+  .admin-name, .admin-role {
+    display: none;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .table-row {
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "user"
+      "email"
+      "role"
+      "status"
+      "date"
+      "actions";
+  }
+  
+  .filter-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-group select {
+    width: 100%;
+  }
+  
+  .user-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .stat-item {
+    padding: 0;
+  }
+  
+  .stat-item:not(:last-child) {
+    border-right: none;
+  }
+}
+/* Custom styles for Material Management */
+.material-icon {
+  width: 40px;
+  height: 40px;
+  background: #f0f5ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a00e0;
+}
+
+.material-icon.large {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+}
+
+.placeholder-text {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  font-style: italic;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status-badge.published {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.status-badge.draft {
+  background: rgba(241, 196, 15, 0.1);
+  color: #f1c40f;
+}
+
+.status-badge.archived {
+  background: rgba(149, 165, 166, 0.1);
+  color: #95a5a6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .table-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "title title"
+      "category status"
+      "date author"
+      "actions actions";
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .table-cell:nth-child(1) {
+    grid-area: title;
+  }
+  
+  .table-cell:nth-child(2) {
+    grid-area: category;
+  }
+  
+  .table-cell:nth-child(3) {
+    grid-area: date;
+  }
+  
+  .table-cell:nth-child(4) {
+    grid-area: status;
+  }
+  
+  .table-cell:nth-child(5) {
+    grid-area: author;
+  }
+  
+  .table-cell:nth-child(6) {
+    grid-area: actions;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 576px) {
+  .table-row {
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "title"
+      "category"
+      "date"
+      "status"
+      "author"
+      "actions";
+  }
+}
 </style>
