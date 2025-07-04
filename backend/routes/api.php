@@ -64,6 +64,12 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::post('/materi', [MateriController::class, 'store']);
+    Route::put('/materi/{id}', [MateriController::class, 'update']);
+    Route::get('/materi/{id}', [MateriController::class, 'show']);
+    Route::post('/materi/{id}', [MateriController::class, 'update']); // untuk support _method PUT
+    Route::delete('/materi/{id}', [MateriController::class, 'destroy']);
+
+
 
     /*
     |--------------------------------------------------------------------------

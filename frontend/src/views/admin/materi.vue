@@ -187,12 +187,12 @@
                 </div>
               </div>
               <div class="table-cell actions">
-                <button class="icon-btn edit" @click="openEditMaterialModal(material)">
+                <router-link :to="`/editMateri/${material.id}`" class="icon-btn edit">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
-                </button>
+                </router-link>
                 <button class="icon-btn delete" @click="confirmDeleteMaterial(material)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -496,10 +496,41 @@ methods: {
       });
     }
   },
-  deleteMaterial() {
-    const index = this.materials.findIndex(m => m.id === this.materialToDelete.id);
+  async deleteMaterial() {
+    const id = this.materialToDelete.id;
+    const index = this.materials.findIndex(m => m.id === id);
+    const token = localStorage.getItem('auth_token');
 
-    if (index !== -1) {
+    if (!token) {
+      this.toast.error('Token tidak ditemukan. Silakan login ulang.', {
+        timeout: 3000,
+        position: 'top-right'
+      });
+      return;
+    }
+
+    if (index === -1) {
+      this.toast.error('Materi tidak ditemukan dalam daftar.', {
+        timeout: 3000,
+        position: 'top-right'
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8000/api/materi/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Gagal menghapus materi dari server');
+      }
+
       const deletedTitle = this.materialToDelete.title;
       this.materials.splice(index, 1);
       this.showDeleteConfirmation = false;
@@ -508,8 +539,16 @@ methods: {
         timeout: 3000,
         position: 'top-right'
       });
+
+    } catch (error) {
+      console.error('Error deleting material:', error);
+      this.toast.error(`Gagal menghapus materi: ${error.message}`, {
+        timeout: 3000,
+        position: 'top-right'
+      });
     }
   }
+
 },
 
 mounted() {

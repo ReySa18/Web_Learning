@@ -11,6 +11,7 @@ import Admin from '../views/admin/admin.vue'
 import UserManagement from '../views/admin/user.vue'
 import InputMateri from '../views/admin/inputMateri.vue'
 import Materi from '../views/admin/materi.vue'
+import editMateri from '../views/admin/editMateri.vue'
 
 const routes = [
   { path: '/', name: 'Login', component: Login },
@@ -21,6 +22,7 @@ const routes = [
   { path: '/kelas', name: 'Kelas', component: Kelas },
   { path: '/inputMateri', name: 'InputMateri', component: InputMateri },
   { path: '/materi', name: 'Materi', component: Materi },
+  { path: '/editmateri/:id', name: 'EditMateri', component: editMateri },
   { path: '/admin',
     name: 'admin',
     component: Admin,

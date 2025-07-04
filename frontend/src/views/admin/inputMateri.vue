@@ -19,7 +19,7 @@
         </div>
 
         <div class="form-group">
-          <label><i class="fas fa-tag"></i> LABEL</label>
+          <label><i class="fas fa-tag"></i> KATEGORI</label>
           <div class="input-wrapper">
             <i class="fas fa-tag input-icon"></i>
             <input v-model="label" type="text" class="input" placeholder="Masukkan label/kategori" />
@@ -73,8 +73,10 @@ import axios from 'axios';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 
 const router = useRouter();
+const toast = useToast();
 
 // Form fields
 const judul = ref('');
@@ -118,7 +120,7 @@ const formatFileSize = (size) => {
 const submit = async () => {
   // Validasi sederhana
   if (!judul.value || !label.value || !deskripsi.value) {
-    alert('Judul, label, dan deskripsi wajib diisi.');
+    toast.error('Judul, label, dan deskripsi wajib diisi.');
     return;
   }
 
@@ -133,7 +135,7 @@ const submit = async () => {
 
   const token = localStorage.getItem('auth_token');
   if (!token) {
-    alert('Token tidak ditemukan. Anda harus login terlebih dahulu.');
+    toast.error('Anda tidak dikenali.Silahkan login terlebih dahulu.');
     return;
   }
 
@@ -146,9 +148,9 @@ const submit = async () => {
     });
 
     console.log('Sukses:', response.data);
-    alert('Materi berhasil disubmit!');
+    toast.success('Materi berhasil disubmit!');
     // Redirect ke halaman manajemen materi
-    router.push('/materi'); // Ubah path sesuai route kamu
+    router.push('/materi');
 
     // Reset form
     judul.value = '';
