@@ -72,7 +72,11 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+
+// Form fields
 const judul = ref('');
 const label = ref('');
 const deskripsi = ref('');
@@ -80,6 +84,7 @@ const konten = ref('');
 const gambar = ref(null);
 const fileInput = ref(null);
 
+// Editor options
 const editorOptions = {
   modules: {
     toolbar: [
@@ -91,6 +96,7 @@ const editorOptions = {
   placeholder: 'Tulis konten materi di sini...'
 };
 
+// File handling
 const triggerFileInput = () => {
   fileInput.value.click();
 };
@@ -108,36 +114,55 @@ const formatFileSize = (size) => {
   return `${(kb / 1024).toFixed(2)} MB`;
 };
 
+// Submit function
 const submit = async () => {
+  // Validasi sederhana
+  if (!judul.value || !label.value || !deskripsi.value) {
+    alert('Judul, label, dan deskripsi wajib diisi.');
+    return;
+  }
+
   const formData = new FormData();
   formData.append('judul', judul.value);
   formData.append('label', label.value);
   formData.append('deskripsi', deskripsi.value);
-  formData.append('konten', konten.value);
+  formData.append('konten', konten.value || '');
   if (gambar.value) {
     formData.append('gambar', gambar.value);
+  }
+
+  const token = localStorage.getItem('auth_token');
+  if (!token) {
+    alert('Token tidak ditemukan. Anda harus login terlebih dahulu.');
+    return;
   }
 
   try {
     const response = await axios.post('http://localhost:8000/api/materi', formData, {
       headers: {
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'
       }
     });
-    console.log(response.data);
+
+    console.log('Sukses:', response.data);
     alert('Materi berhasil disubmit!');
-    // Kosongkan input setelah sukses (optional)
+    // Redirect ke halaman manajemen materi
+    router.push('/materi'); // Ubah path sesuai route kamu
+
+    // Reset form
     judul.value = '';
     label.value = '';
     deskripsi.value = '';
     konten.value = '';
     gambar.value = null;
   } catch (error) {
-    console.error(error);
+    console.error('Gagal mengirim materi:', error);
     alert('Terjadi kesalahan saat mengirim data');
   }
 };
 </script>
+
 
 
 <style scoped>

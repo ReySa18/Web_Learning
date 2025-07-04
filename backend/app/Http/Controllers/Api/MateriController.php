@@ -12,7 +12,7 @@ class MateriController extends Controller
     public function index()
     {
         // Ambil materi + relasi author
-        $materis = Materi::with('author')->get();
+        $materis = Materi::all();
         return response()->json($materis);
     }
 
@@ -33,11 +33,10 @@ class MateriController extends Controller
             $validated['gambar'] = $path;
         }
 
-        // Tambahkan author_id dari user yang login
-        $validated['author_id'] = $request->user()->id;
-
+        // Simpan data ke database
         $materi = Materi::create($validated);
 
         return response()->json($materi, 201);
     }
+
 }

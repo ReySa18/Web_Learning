@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -15,12 +14,7 @@ class Materi extends Model
         'label',
         'konten',
         'gambar',
-        'author_id'
     ];
 
-        // Relasi ke tabel users (author)
-    public function author()
-    {
-        return $this->belongsTo(User::class, 'author_id');
-    }
+
 }

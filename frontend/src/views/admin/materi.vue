@@ -84,13 +84,13 @@
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </div>
-            <button class="primary-btn" @click="openAddMaterialModal">
+            <router-link to="/inputmateri" class="primary-btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
               Tambah Materi
-            </button>
+            </router-link>
           </div>
         </div>
         
@@ -150,7 +150,6 @@
               <div class="table-cell">Kategori</div>
               <div class="table-cell">Tanggal Dibuat</div>
               <div class="table-cell">Status</div>
-              <div class="table-cell">Penulis</div>
               <div class="table-cell">Aksi</div>
             </div>
           </div>
@@ -158,7 +157,7 @@
           <div class="table-body">
             <div v-for="material in paginatedMaterials" :key="material.id" class="table-row">
               <div class="table-cell">
-                <div class="user-info">
+                <div class="materi-info">
                   <div class="material-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -169,16 +168,16 @@
                     </svg>
                   </div>
                   <div>
-                    <div class="user-name">{{ material.title }}</div>
-                    <div class="user-id">ID: {{ material.id }}</div>
+                    <div class="materi-title">{{ material.title }}</div>
+                    <div class="materi-id">ID: {{ material.id }}</div>
                   </div>
                 </div>
               </div>
               <div class="table-cell">
-                <div class="user-email">{{ material.category }}</div>
+                <div class="materi-category">{{ material.category }}</div>
               </div>
               <div class="table-cell">
-                <div class="join-date">{{ material.createdAt }}</div>
+                <div class="materi-createdAt">{{ material.createdAt }}</div>
               </div>
               <div class="table-cell">
                 <div class="status-container">
@@ -186,9 +185,6 @@
                     {{ statusLabels[material.status] }}
                   </span>
                 </div>
-              </div>
-              <div class="table-cell">
-                <div class="user-email">{{ material.author }}</div>
               </div>
               <div class="table-cell actions">
                 <button class="icon-btn edit" @click="openEditMaterialModal(material)">
@@ -342,8 +338,7 @@ export default {
         title: '',
         category: '',
         createdAt: '',
-        status: 'draft',
-        author: ''
+        status: 'draft'
       },
       editingMaterial: {},
       materialToDelete: {},
@@ -365,8 +360,7 @@ export default {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(material => 
           material.title.toLowerCase().includes(query) || 
-          material.category.toLowerCase().includes(query) ||
-          material.author.toLowerCase().includes(query)
+          material.category.toLowerCase().includes(query)
         );
       }
 
@@ -425,7 +419,6 @@ methods: {
         category: item.label,
         createdAt: this.formatDate(item.created_at),
         status: 'published', // Sesuaikan kalau ada status di DB
-        author: item.author?.name || 'Tidak diketahui'
       }));
     } catch (error) {
       this.toast.error('Gagal memuat materi dari server');
@@ -448,8 +441,7 @@ methods: {
       title: '',
       category: '',
       createdAt: this.getCurrentDate(),
-      status: 'draft',
-      author: 'Admin User'
+      status: 'draft'
     };
     this.showAddMaterialModal = true;
   },
@@ -839,7 +831,7 @@ mounted() {
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr 1.5fr 1fr;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr; /* 5 kolom dioptimalkan */
   padding: 15px 20px;
   border-bottom: 1px solid #eee;
 }
@@ -854,27 +846,27 @@ mounted() {
   font-size: 14px;
 }
 
-.user-info {
+.materi-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.user-info .avatar {
+.materi-info .avatar {
   width: 40px;
   height: 40px;
 }
 
-.user-name {
+.materi-title {
   font-weight: 500;
 }
 
-.user-id {
+.materi-id {
   font-size: 12px;
   color: #777;
 }
 
-.user-email {
+.materi-category {
   font-weight: 500;
 }
 
@@ -966,7 +958,7 @@ input:checked + .slider:before {
   color: #ff4757;
 }
 
-.join-date {
+.materi-createdAt {
   font-weight: 500;
 }
 
@@ -1465,7 +1457,7 @@ input:checked + .slider:before {
     grid-template-areas: 
       "title title"
       "category status"
-      "date author"
+      "date date"
       "actions actions";
     gap: 15px;
     padding: 15px;
@@ -1488,10 +1480,6 @@ input:checked + .slider:before {
   }
   
   .table-cell:nth-child(5) {
-    grid-area: author;
-  }
-  
-  .table-cell:nth-child(6) {
     grid-area: actions;
     justify-content: flex-end;
   }
@@ -1505,7 +1493,6 @@ input:checked + .slider:before {
       "category"
       "date"
       "status"
-      "author"
       "actions";
   }
 }
