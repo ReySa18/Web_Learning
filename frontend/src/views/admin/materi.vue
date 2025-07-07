@@ -106,12 +106,10 @@
             </div>
             
             <div class="filter-group">
-              <label>Status:</label>
-              <select v-model="statusFilter">
-                <option value="all">Semua Status</option>
-                <option value="published">Dipublikasikan</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Diarsipkan</option>
+              <label>Topik:</label>
+              <select v-model="topicFilter">
+                <option value="all">Semua Topik</option>
+                <option v-for="topic in topics" :key="topic" :value="topic">{{ topic }}</option>
               </select>
             </div>
             
@@ -131,14 +129,6 @@
               <span class="stat-value">{{ filteredMaterials.length }}</span>
               <span class="stat-label">Total Materi</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ publishedCount }}</span>
-              <span class="stat-label">Dipublikasikan</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ draftCount }}</span>
-              <span class="stat-label">Draft</span>
-            </div>
           </div>
         </div>
         
@@ -148,8 +138,8 @@
             <div class="table-row">
               <div class="table-cell">Judul Materi</div>
               <div class="table-cell">Kategori</div>
-              <div class="table-cell">Tanggal Dibuat</div>
               <div class="table-cell">Status</div>
+              <div class="table-cell">Tanggal Dibuat</div>
               <div class="table-cell">Aksi</div>
             </div>
           </div>
@@ -177,15 +167,12 @@
                 <div class="materi-category">{{ material.category }}</div>
               </div>
               <div class="table-cell">
-                <div class="materi-createdAt">{{ material.createdAt }}</div>
+                <div class="materi-topic">{{ material.topic }}</div>
               </div>
               <div class="table-cell">
-                <div class="status-container">
-                  <span :class="['status-badge', material.status]">
-                    {{ statusLabels[material.status] }}
-                  </span>
-                </div>
+                <div class="materi-createdAt">{{ material.createdAt }}</div>
               </div>
+              
               <div class="table-cell actions">
                 <router-link :to="`/editMateri/${material.id}`" class="icon-btn edit">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -326,7 +313,7 @@ export default {
     return {
       searchQuery: '',
       categoryFilter: 'all',
-      statusFilter: 'all',
+      topicFilter: 'all',
       sortBy: 'recent',
       currentPage: 1,
       itemsPerPage: 8,
@@ -337,17 +324,13 @@ export default {
         id: '',
         title: '',
         category: '',
-        createdAt: '',
-        status: 'draft'
+        status: 'draft',
+        createdAt: ''
       },
       editingMaterial: {},
       materialToDelete: {},
-      categories: ['Pemrograman', 'Desain', 'Bisnis', 'Bahasa', 'Matematika', 'Sains'],
-      statusLabels: {
-        published: 'Dipublikasikan',
-        draft: 'Draft',
-        archived: 'Diarsipkan'
-      },
+      categories: ['C', 'C++', 'Python'],
+      topics: [],
       materials: []
     };
   },
@@ -370,8 +353,8 @@ export default {
       }
 
       // Filter by status
-      if (this.statusFilter !== 'all') {
-        filtered = filtered.filter(material => material.status === this.statusFilter);
+      if (this.topicFilter !== 'all') {
+        filtered = filtered.filter(material => material.topic === this.topicFilter);
       }
 
       // Sorting
@@ -416,16 +399,28 @@ methods: {
       this.materials = data.map(item => ({
         id: item.id,
         title: item.judul,
-        category: item.label,
+        category: item.kategori?.nama,
+        topic: item.topik?.nama,
         createdAt: this.formatDate(item.created_at),
-        status: 'published', // Sesuaikan kalau ada status di DB
       }));
     } catch (error) {
       this.toast.error('Gagal memuat materi dari server');
       console.error(error);
     }
   },
-
+  async fetchTopics() {
+      try {
+        const response = await fetch('http://localhost:8000/api/topik', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const data = await response.json();
+        this.topics = data.map(t => t.nama); // Sesuaikan dengan struktur API
+      } catch (error) {
+        this.toast.error('Gagal memuat topik dari server');
+      }
+    },
   formatDate(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('id-ID', {
@@ -553,6 +548,7 @@ methods: {
 
 mounted() {
   this.fetchMaterials();
+  this.fetchTopics();
 }
 
 }
@@ -628,7 +624,15 @@ mounted() {
   align-items: center;
   justify-content: center;
 }
-
+.materi-topic {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  background: rgba(74, 0, 224, 0.1);
+  color: #4a00e0;
+}
 .admin-profile {
   display: flex;
   align-items: center;

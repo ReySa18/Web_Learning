@@ -22,15 +22,34 @@
             <input v-model="materi.judul" type="text" class="input" placeholder="Masukkan judul materi" />
           </div>
         </div>
+      </div>
 
+      <div class="form-row">
         <div class="form-group">
           <label><i class="fas fa-tag"></i> KATEGORI</label>
           <div class="input-wrapper">
             <i class="fas fa-tag input-icon"></i>
-            <select v-model="materi.label" class="input">
-              <option value="">Pilih Kategori</option>
-              <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+            <select v-model="materi.kategori_id" class="input" :disabled="loadingKategori">
+              <option value="" disabled>Pilih Kategori</option>
+              <option v-for="kategori in kategoriList" :key="kategori.id" :value="kategori.id">
+                {{ kategori.nama }}
+              </option>
             </select>
+            <i v-if="loadingKategori" class="fas fa-spinner fa-spin input-icon-right"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-bookmark"></i> TOPIK</label>
+          <div class="input-wrapper">
+            <i class="fas fa-bookmark input-icon"></i>
+            <select v-model="materi.topik_id" class="input" :disabled="loadingTopik">
+              <option value="" disabled>Pilih Topik</option>
+              <option v-for="topik in topikList" :key="topik.id" :value="topik.id">
+                {{ topik.nama }}
+              </option>
+            </select>
+            <i v-if="loadingTopik" class="fas fa-spinner fa-spin input-icon-right"></i>
           </div>
         </div>
       </div>
@@ -77,8 +96,13 @@
         <button class="cancel-btn" @click="cancelEdit">
           <i class="fas fa-times"></i> Batal
         </button>
-        <button class="update-btn" @click="submit">
-          <i class="fas fa-save"></i> Update Materi
+        <button class="update-btn" @click="submit" :disabled="isSubmitting">
+          <template v-if="isSubmitting">
+            <i class="fas fa-spinner fa-spin"></i> Memperbarui...
+          </template>
+          <template v-else>
+            <i class="fas fa-save"></i> Update Materi
+          </template>
         </button>
       </div>
     </div>
@@ -101,7 +125,8 @@ const toast = useToast();
 const materi = ref({
   id: '',
   judul: '',
-  label: '',
+  kategori_id: '',
+  topik_id: '',
   deskripsi: '',
   konten: '',
   gambar: ''
@@ -110,18 +135,13 @@ const materi = ref({
 const gambar = ref(null);
 const fileInput = ref(null);
 const loading = ref(true);
+const isSubmitting = ref(false);
+const loadingKategori = ref(false);
+const loadingTopik = ref(false);
 
-// Kategori materi
-const categories = ref([
-  'Pemrograman',
-  'Desain Grafis',
-  'Bisnis',
-  'Bahasa',
-  'Matematika',
-  'Sains',
-  'Seni',
-  'Sejarah'
-]);
+// Data dropdown
+const kategoriList = ref([]);
+const topikList = ref([]);
 
 // Editor options
 const editorOptions = {
@@ -134,6 +154,44 @@ const editorOptions = {
     ]
   },
   placeholder: 'Tulis konten materi di sini...'
+};
+
+// Fetch kategori dari API
+const fetchKategori = async () => {
+  loadingKategori.value = true;
+  try {
+    const token = localStorage.getItem('auth_token');
+    const response = await axios.get('http://localhost:8000/api/kategori', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    kategoriList.value = response.data;
+  } catch (error) {
+    console.error('Gagal mengambil data kategori:', error);
+    toast.error('Gagal mengambil data kategori');
+  } finally {
+    loadingKategori.value = false;
+  }
+};
+
+// Fetch topik dari API
+const fetchTopik = async () => {
+  loadingTopik.value = true;
+  try {
+    const token = localStorage.getItem('auth_token');
+    const response = await axios.get('http://localhost:8000/api/topik', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    topikList.value = response.data;
+  } catch (error) {
+    console.error('Gagal mengambil data topik:', error);
+    toast.error('Gagal mengambil data topik');
+  } finally {
+    loadingTopik.value = false;
+  }
 };
 
 // File handling
@@ -164,7 +222,7 @@ const loadMateri = async () => {
   try {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      toast.error('Token tidak ditemukan. Anda harus login terlebih dahulu.', 'error');
+      toast.error('Token tidak ditemukan. Anda harus login terlebih dahulu.');
       return;
     }
 
@@ -178,22 +236,25 @@ const loadMateri = async () => {
     loading.value = false;
   } catch (error) {
     console.error('Gagal memuat data materi:', error);
-    toast.error('Gagal memuat data materi', 'error');
+    toast.error('Gagal memuat data materi');
     loading.value = false;
   }
 };
 
 // Submit function untuk update
 const submit = async () => {
-  if (!materi.value.judul || !materi.value.label || !materi.value.deskripsi) {
-    toast.error('Judul, kategori, dan deskripsi wajib diisi.', 'error');
+  if (!materi.value.judul || !materi.value.kategori_id || !materi.value.topik_id || !materi.value.deskripsi) {
+    toast.error('Judul, kategori, topik, dan deskripsi wajib diisi.');
     return;
   }
+
+  isSubmitting.value = true;
 
   const formData = new FormData();
   formData.append('_method', 'PUT');
   formData.append('judul', materi.value.judul);
-  formData.append('label', materi.value.label);
+  formData.append('kategori_id', materi.value.kategori_id);
+  formData.append('topik_id', materi.value.topik_id);
   formData.append('deskripsi', materi.value.deskripsi);
   formData.append('konten', materi.value.konten || '');
 
@@ -203,7 +264,8 @@ const submit = async () => {
 
   const token = localStorage.getItem('auth_token');
   if (!token) {
-    toast.error('Token tidak ditemukan. Anda harus login terlebih dahulu.', 'error');
+    toast.error('Token tidak ditemukan. Anda harus login terlebih dahulu.');
+    isSubmitting.value = false;
     return;
   }
 
@@ -215,13 +277,21 @@ const submit = async () => {
       }
     });
 
-    toast.success('Materi berhasil diperbarui!', 'success');
+    toast.success('Materi berhasil diperbarui!');
     setTimeout(() => {
       router.push('/materi');
     }, 1500);
   } catch (error) {
     console.error('Gagal mengupdate materi:', error);
-    toast.error('Terjadi kesalahan saat mengupdate materi', 'error');
+    
+    let errorMessage = 'Terjadi kesalahan saat mengupdate materi';
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage = error.response.data.message;
+    }
+    
+    toast.error(errorMessage);
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
@@ -232,11 +302,38 @@ const cancelEdit = () => {
 
 onMounted(() => {
   loadMateri();
+  fetchKategori();
+  fetchTopik();
 });
 </script>
 
-
 <style scoped>
+/* Tambahkan style untuk input-icon-right */
+.input-icon-right {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+/* Tambahkan style untuk select agar mirip dengan input */
+.input-wrapper select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+/* Tambahkan style untuk loading spinner di button */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Style yang sudah ada sebelumnya tetap dipertahankan */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 * {
   margin: 0;

@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MateriController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\TopikController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,9 @@ Route::get('/materi', [MateriController::class, 'index']);
 
 // Daftar semua user (jika memang dimaksudkan untuk publik, jika tidak, pindahkan ke grup auth)
 Route::get('/users', [UserController::class, 'index']);
+
+Route::get('/kategori', [KategoriController::class, 'index']);
+Route::get('/topik', [TopikController::class, 'index']);
 
 
 
@@ -68,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/materi/{id}', [MateriController::class, 'show']);
     Route::post('/materi/{id}', [MateriController::class, 'update']); // untuk support _method PUT
     Route::delete('/materi/{id}', [MateriController::class, 'destroy']);
+
 
 
 

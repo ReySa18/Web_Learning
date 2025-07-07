@@ -12,17 +12,17 @@ class MateriController extends Controller
     public function index()
     {
         // Ambil materi + relasi author
-        $materis = Materi::all();
+        $materis = Materi::with(['kategori', 'topik'])->get();
         return response()->json($materis);
     }
 
-    // POST /api/materis
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'kategori_id' => 'required|exists:kategori,id',
+            'topik_id' => 'required|exists:topik,id',
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'label' => 'required|string',
             'konten' => 'nullable|string',
             'gambar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
@@ -36,14 +36,17 @@ class MateriController extends Controller
         // Simpan data ke database
         $materi = Materi::create($validated);
 
-        return response()->json($materi, 201);
+        return response()->json([
+            'message' => 'Materi berhasil ditambahkan',
+            'data' => $materi
+        ], 201);
     }
+
 
     public function show($id)
     {
-        $user = auth()->user(); // Ambil user login (siswa/admin)
-
-        $materi = Materi::find($id);
+        // Ambil materi beserta relasi kategori dan topik
+        $materi = Materi::with(['kategori', 'topik'])->find($id);
 
         if (!$materi) {
             return response()->json(['message' => 'Materi tidak ditemukan'], 404);
@@ -51,6 +54,7 @@ class MateriController extends Controller
 
         return response()->json($materi);
     }
+
 
     public function update(Request $request, $id)
     {
@@ -61,12 +65,15 @@ class MateriController extends Controller
         }
 
         $validated = $request->validate([
+            'kategori_id' => 'required|exists:kategori,id',
+            'topik_id' => 'required|exists:topik,id',
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'label' => 'required|string',
             'konten' => 'nullable|string',
             'gambar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
+
+
 
         // Jika ada file baru dikirim
         if ($request->hasFile('gambar')) {

@@ -9,20 +9,40 @@
       <div class="form-decoration"></div>
       <h2 class="form-title"><i class="fas fa-pen"></i> Formulir Materi Baru</h2>
 
-      <div class="form-row">
-        <div class="form-group">
+      <div class="form-group">
           <label><i class="fas fa-heading"></i> JUDUL</label>
           <div class="input-wrapper">
             <i class="fas fa-heading input-icon"></i>
             <input v-model="judul" type="text" class="input" placeholder="Masukkan judul materi" />
           </div>
-        </div>
+      </div>
 
+      <div class="form-row">
         <div class="form-group">
           <label><i class="fas fa-tag"></i> KATEGORI</label>
           <div class="input-wrapper">
             <i class="fas fa-tag input-icon"></i>
-            <input v-model="label" type="text" class="input" placeholder="Masukkan label/kategori" />
+            <select v-model="kategori_id" class="input" :disabled="loadingKategori">
+              <option value="" disabled selected>Pilih Kategori</option>
+              <option v-for="kategori in kategoriList" :key="kategori.id" :value="kategori.id">
+                {{ kategori.nama }}
+              </option>
+            </select>
+            <i v-if="loadingKategori" class="fas fa-spinner fa-spin input-icon-right"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-bookmark"></i> TOPIK</label>
+          <div class="input-wrapper">
+            <i class="fas fa-bookmark input-icon"></i>
+            <select v-model="topik_id" class="input" :disabled="loadingTopik">
+              <option value="" disabled selected>Pilih Topik</option>
+              <option v-for="topik in topikList" :key="topik.id" :value="topik.id">
+                {{ topik.nama }}
+              </option>
+            </select>
+            <i v-if="loadingTopik" class="fas fa-spinner fa-spin input-icon-right"></i>
           </div>
         </div>
       </div>
@@ -58,9 +78,18 @@
         </div>
       </div>
 
-      <div class="submit-button">
-        <button @click="submit">
-          <i class="fas fa-save"></i> Simpan Materi
+      <div class="action-button">
+        <!-- Tombol Batal baru di sini -->
+        <button class="cancel-btn" @click="cancelTambah">
+          <i class="fas fa-times"></i> Batal
+        </button>
+        <button class="submit-button" @click="submit" :disabled="isSubmitting">
+          <template v-if="isSubmitting">
+            <i class="fas fa-spinner fa-spin"></i> Menyimpan...
+          </template>
+          <template v-else>
+            <i class="fas fa-save"></i> Simpan Materi
+          </template>
         </button>
       </div>
     </div>
@@ -68,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
@@ -80,11 +109,17 @@ const toast = useToast();
 
 // Form fields
 const judul = ref('');
-const label = ref('');
+const kategori_id = ref('');
+const topik_id = ref('');
+const kategoriList = ref([]);
+const topikList = ref([]);
 const deskripsi = ref('');
 const konten = ref('');
 const gambar = ref(null);
 const fileInput = ref(null);
+const loadingKategori = ref(false);
+const loadingTopik = ref(false);
+const isSubmitting = ref(false);
 
 // Editor options
 const editorOptions = {
@@ -97,6 +132,50 @@ const editorOptions = {
   },
   placeholder: 'Tulis konten materi di sini...'
 };
+
+// Fetch kategori from API
+const fetchKategori = async () => {
+  loadingKategori.value = true;
+  try {
+    const token = localStorage.getItem('auth_token');
+    const response = await axios.get('http://localhost:8000/api/kategori', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    kategoriList.value = response.data;
+
+  } catch (error) {
+    console.error('Gagal mengambil data kategori:', error);
+    toast.error('Gagal mengambil data kategori');
+  } finally {
+    loadingKategori.value = false;
+  }
+};
+
+// Fetch topik from API
+const fetchTopik = async () => {
+  loadingTopik.value = true;
+  try {
+    const token = localStorage.getItem('auth_token');
+    const response = await axios.get('http://localhost:8000/api/topik', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    topikList.value = response.data;
+  } catch (error) {
+    console.error('Gagal mengambil data topik:', error);
+    toast.error('Gagal mengambil data topik');
+  } finally {
+    loadingTopik.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchKategori();
+  fetchTopik();
+});
 
 // File handling
 const triggerFileInput = () => {
@@ -118,15 +197,18 @@ const formatFileSize = (size) => {
 
 // Submit function
 const submit = async () => {
-  // Validasi sederhana
-  if (!judul.value || !label.value || !deskripsi.value) {
-    toast.error('Judul, label, dan deskripsi wajib diisi.');
+  // Validasi
+  if (!judul.value || !kategori_id.value || !topik_id.value || !deskripsi.value) {
+    toast.error('Semua field wajib diisi kecuali file pendukung');
     return;
   }
 
+  isSubmitting.value = true;
+
   const formData = new FormData();
   formData.append('judul', judul.value);
-  formData.append('label', label.value);
+  formData.append('kategori_id', kategori_id.value);
+  formData.append('topik_id', topik_id.value);
   formData.append('deskripsi', deskripsi.value);
   formData.append('konten', konten.value || '');
   if (gambar.value) {
@@ -135,7 +217,8 @@ const submit = async () => {
 
   const token = localStorage.getItem('auth_token');
   if (!token) {
-    toast.error('Anda tidak dikenali.Silahkan login terlebih dahulu.');
+    toast.error('Anda tidak dikenali. Silahkan login terlebih dahulu.');
+    isSubmitting.value = false;
     return;
   }
 
@@ -147,27 +230,67 @@ const submit = async () => {
       }
     });
 
-    console.log('Sukses:', response.data);
-    toast.success('Materi berhasil disubmit!');
+    toast.success('Materi berhasil disimpan!');
     // Redirect ke halaman manajemen materi
     router.push('/materi');
-
+    
     // Reset form
-    judul.value = '';
-    label.value = '';
-    deskripsi.value = '';
-    konten.value = '';
-    gambar.value = null;
+    resetForm();
   } catch (error) {
-    console.error('Gagal mengirim materi:', error);
-    alert('Terjadi kesalahan saat mengirim data');
+    console.error('Gagal menyimpan materi:', error);
+    
+    let errorMessage = 'Terjadi kesalahan saat menyimpan data';
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage = error.response.data.message;
+    }
+    
+    toast.error(errorMessage);
+  } finally {
+    isSubmitting.value = false;
   }
+};
+
+const resetForm = () => {
+  judul.value = '';
+  kategori_id.value = '';
+  topik_id.value = '';
+  deskripsi.value = '';
+  konten.value = '';
+  gambar.value = null;
+};
+
+const cancelTambah = () => {
+  router.push('/materi');
 };
 </script>
 
-
-
 <style scoped>
+/* Tambahkan style untuk input-icon-right */
+.input-icon-right {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+/* Tambahkan style untuk select agar mirip dengan input */
+.input-wrapper select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+/* Tambahkan style untuk loading spinner di button */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Style yang sudah ada sebelumnya tetap dipertahankan */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 * {
       margin: 0;
@@ -422,13 +545,14 @@ const submit = async () => {
       color: #4361ee;
     }
     
-    .submit-button {
+    .action-button {
       display: flex;
       justify-content: flex-end;
       margin-top: 30px;
+      gap: 15px;
     }
     
-    .submit-button button {
+    .submit-button {
       padding: 16px 40px;
       background: linear-gradient(to right, #4361ee, #3a0ca3);
       color: white;
@@ -447,7 +571,25 @@ const submit = async () => {
       z-index: 1;
     }
     
-    .submit-button button::before {
+    .cancel-btn {
+      padding: 16px 40px;
+      background: #f1f5f9;
+      color: #64748b;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .submit-button ::before {
       content: '';
       position: absolute;
       top: 0;
@@ -459,7 +601,7 @@ const submit = async () => {
       z-index: -1;
     }
     
-    .submit-button button:hover::before {
+    .submit-button :hover::before {
       left: 100%;
     }
     
@@ -470,6 +612,11 @@ const submit = async () => {
     
     .submit-button button:active {
       transform: translateY(0);
+    }
+
+    .cancel-btn:hover {
+      background: #e2e8f0;
+      transform: translateY(-2px);
     }
     
     .form-decoration {
@@ -533,6 +680,14 @@ const submit = async () => {
       .form-title {
         font-size: 1.5rem;
       }
+      .action-button {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .cancel-btn, .submit-button {
+        width: 100%;
+        justify-content: center;
+      }
     }
     
     @media (max-width: 480px) {
@@ -549,10 +704,6 @@ const submit = async () => {
         border-radius: 12px;
       }
       
-      .submit-button button {
-        width: 100%;
-        justify-content: center;
-      }
       
       .header {
         padding: 15px;
@@ -565,6 +716,12 @@ const submit = async () => {
       
       .file-upload-container {
         padding: 20px;
+      }
+
+      .submit-button,
+      .cancel-btn {
+        width: 100%;
+        justify-content: center;     
       }
     }
 </style>

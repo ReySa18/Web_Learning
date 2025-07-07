@@ -102,7 +102,6 @@
               <select v-model="roleFilter">
                 <option value="all">Semua Peran</option>
                 <option value="admin">Admin</option>
-                <option value="instruktur">Instruktur</option>
                 <option value="siswa">Siswa</option>
               </select>
             </div>
@@ -137,8 +136,8 @@
               <span class="stat-label">Pengguna Aktif</span>
             </div>
             <div class="stat-item">
-              <span class="stat-value">{{ instrukturCount }}</span>
-              <span class="stat-label">Instruktur</span>
+              <span class="stat-value">{{ SiswaCount }}</span>
+              <span class="stat-label">Siswa</span>
             </div>
           </div>
         </div>
@@ -174,7 +173,6 @@
               <div class="table-cell">
                 <select v-model="user.role" @change="updateUserRole(user)" class="role-select">
                   <option value="admin">Admin</option>
-                  <option value="instruktur">Instruktur</option>
                   <option value="siswa">Siswa</option>
                 </select>
               </div>
@@ -265,7 +263,6 @@
               <label>Peran</label>
               <select v-model="newUser.role">
                 <option value="siswa">Siswa</option>
-                <option value="instruktur">Instruktur</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
@@ -343,7 +340,6 @@
               <label>Peran</label>
               <select v-model="editingUser.role">
                 <option value="siswa">Siswa</option>
-                <option value="instruktur">Instruktur</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
@@ -477,8 +473,8 @@ export default {
     activeUserCount() {
       return this.users.filter(user => user.status === 'active').length;
     },
-    instrukturCount() {
-      return this.users.filter(user => user.role === 'instruktur').length;
+    SiswaCount() {
+      return this.users.filter(user => user.role === 'siswa').length;
     },
     totalPages() {
       return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
