@@ -12,6 +12,7 @@ import UserManagement from '../views/admin/user.vue'
 import InputMateri from '../views/admin/inputMateri.vue'
 import Materi from '../views/admin/materi.vue'
 import editMateri from '../views/admin/editMateri.vue'
+import SoalManagement from '../views/admin/soal.vue'
 
 const routes = [
   { path: '/', name: 'Login', component: Login },
@@ -55,7 +56,8 @@ const routes = [
           next()
         } 
       }
-  }
+  },
+  { path: '/managementsoal', name: 'Manajemen Soal', component: SoalManagement }
 ]
 
 const router = createRouter({

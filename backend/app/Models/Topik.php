@@ -9,7 +9,7 @@ class Topik extends Model
 {
     use HasFactory;
 
-    protected $table = 'topik'; // Karena bukan 'topiks'
+    protected $table = 'topik';
 
     protected $fillable = ['nama'];
 

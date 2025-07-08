@@ -16,11 +16,26 @@
           <span class="notification-badge">3</span>
         </div>
         
-        <div class="admin-profile">
-          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="avatar">
-          <div>
-            <p class="admin-name">Admin User</p>
-            <p class="admin-role">Super Admin</p>
+        <div class="admin-profile-container" ref="profileContainer">
+          <div class="admin-profile" @click="toggleDropdown">
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="avatar">
+            <div>
+              <p class="admin-name">Admin User</p>
+              <p class="admin-role">Super Admin</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div v-if="showDropdown" class="dropdown-menu">
+            <button @click="logout">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -57,7 +72,7 @@
             <span>Manajemen Materi</span>
           </router-link>
           
-          <router-link to="/questions" class="nav-item">
+          <router-link to="/managementsoal" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -311,6 +326,7 @@ export default {
   },
   data() {
     return {
+      showDropdown: false,
       searchQuery: '',
       categoryFilter: 'all',
       topicFilter: 'all',
@@ -390,7 +406,7 @@ methods: {
     try {
       const response = await fetch('http://localhost:8000/api/materi', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}` // sesuaikan jika pakai auth
+          Authorization: `Bearer ${localStorage.getItem('token')}` 
         }
       });
       const data = await response.json();
@@ -542,13 +558,37 @@ methods: {
         position: 'top-right'
       });
     }
+  },
+  getRoleName(role) {
+    const roles = {
+      'student': 'Siswa',
+      'instructor': 'Instruktur',
+      'admin': 'Admin'
+    };
+    return roles[role] || role;
+  },
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
+  },
+  logout() {
+      localStorage.removeItem('token');
+      this.$router.push('/');
+  },
+  handleClickOutside(event) {
+      if (this.showDropdown && !this.$refs.profileContainer.contains(event.target)) {
+        this.showDropdown = false;
+      }
   }
 
 },
 
 mounted() {
+  document.addEventListener('click', this.handleClickOutside);
   this.fetchMaterials();
   this.fetchTopics();
+},
+beforeUnmount() {
+  document.removeEventListener('click', this.handleClickOutside);
 }
 
 }
@@ -633,10 +673,31 @@ mounted() {
   background: rgba(74, 0, 224, 0.1);
   color: #4a00e0;
 }
+
+.admin-profile-container {
+  position: relative;
+}
+
 .admin-profile {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.admin-profile:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-icon {
+  transition: transform 0.3s;
+}
+
+.admin-profile:hover .dropdown-icon {
+  transform: rotate(180deg);
 }
 
 .avatar {
@@ -661,6 +722,44 @@ mounted() {
 .admin-role {
   font-size: 12px;
   color: #aaa;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  min-width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 15px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdown-menu button:hover {
+  background: #f5f7fa;
+}
+
+.dropdown-menu button svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Main Content */
@@ -867,6 +966,7 @@ mounted() {
 }
 
 .table-header {
+  align-items: center;
   background: #f8f9fa;
   font-weight: 600;
   color: #495057;
@@ -874,7 +974,7 @@ mounted() {
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr; /* 5 kolom dioptimalkan */
+  grid-template-columns: 2fr 1.5fr 1fr 1.5fr auto;
   padding: 15px 20px;
   border-bottom: 1px solid #eee;
 }
@@ -892,7 +992,7 @@ mounted() {
 .materi-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  font-size: 14px;
 }
 
 .materi-info .avatar {
@@ -1290,7 +1390,7 @@ input:checked + .slider:before {
 /* Responsive Styles */
 @media (max-width: 1200px) {
   .table-row {
-    grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr auto;
   }
   
   .table-cell:last-child {
@@ -1440,6 +1540,19 @@ input:checked + .slider:before {
   
   .stat-item:not(:last-child) {
     border-right: none;
+  }
+
+  /* Adjust dropdown for mobile */
+  .admin-profile {
+    padding: 5px;
+  }
+  
+  .admin-name, .admin-role {
+    display: none;
+  }
+  
+  .dropdown-menu {
+    min-width: 140px;
   }
 }
 /* Custom styles for Material Management */

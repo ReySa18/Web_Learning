@@ -16,11 +16,26 @@
           <span class="notification-badge">3</span>
         </div>
         
-        <div class="admin-profile">
-          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="avatar">
-          <div>
-            <p class="admin-name">Admin User</p>
-            <p class="admin-role">Super Admin</p>
+        <div class="admin-profile-container" ref="profileContainer">
+          <div class="admin-profile" @click="toggleDropdown">
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="avatar">
+            <div>
+              <p class="admin-name">Admin User</p>
+              <p class="admin-role">Super Admin</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div v-if="showDropdown" class="dropdown-menu">
+            <button @click="logout">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -57,7 +72,7 @@
             <span>Manajemen Materi</span>
           </router-link>
           
-          <router-link to="/questions" class="nav-item" :class="{ active: activeTab === 'questions' }" @click="activeTab = 'questions'">
+          <router-link to="/managementsoal" class="nav-item" :class="{ active: activeTab === 'questions' }" @click="activeTab = 'questions'">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -87,7 +102,7 @@
                 </svg>
               </div>
               <div class="stat-info">
-                <h3>1,245</h3>
+                <h3>{{ totalUsers }}</h3>
                 <p>Total Pengguna</p>
               </div>
             </div>
@@ -100,7 +115,7 @@
                 </svg>
               </div>
               <div class="stat-info">
-                <h3>24</h3>
+                <h3>{{ totalMaterials }}</h3>
                 <p>Materi Kursus</p>
               </div>
             </div>
@@ -114,68 +129,71 @@
                 </svg>
               </div>
               <div class="stat-info">
-                <h3>358</h3>
+                <h3>{{ totalQuestions }}</h3>
                 <p>Soal Tersedia</p>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon activity">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-              </div>
-              <div class="stat-info">
-                <h3>1,024</h3>
-                <p>Aktivitas Hari Ini</p>
               </div>
             </div>
           </div>
           
-          <!-- Recent Activity -->
-          <div class="recent-activity">
-            <div class="section-header">
-              <h3>Aktivitas Terbaru</h3>
-              <button class="view-all">Lihat Semua</button>
+          <!-- Preview Sections - DIUBAH MENJADI SUSUN KE BAWAH -->
+          <div class="preview-grid">
+            <!-- User Preview -->
+            <div class="preview-section">
+              <div class="section-header">
+                <h3>Pengguna Terbaru</h3>
+                <router-link to="/usermanagement" class="view-all">Lihat Semua</router-link>
+              </div>
+              <div class="preview-list">
+                <div v-for="user in recentUsers" :key="user.id" class="preview-item">
+                  <div class="user-info">
+                    <img :src="user.avatar" :alt="user.name" class="avatar">
+                    <div>
+                      <p class="user-name">{{ user.name }}</p>
+                      <p class="user-email">{{ user.email }}</p>
+                    </div>
+                  </div>
+                  <span :class="['role-badge', user.role]">{{ getRoleName(user.role) }}</span>
+                </div>
+              </div>
             </div>
             
-            <div class="activity-list">
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                </div>
-                <div class="activity-details">
-                  <p><strong>Budi Santoso</strong> menyelesaikan materi "HTML Dasar"</p>
-                  <span>10 menit yang lalu</span>
+            <!-- Material Preview -->
+            <div class="preview-section">
+              <div class="section-header">
+                <h3>Materi Terbaru</h3>
+                <router-link to="/materi" class="view-all">Lihat Semua</router-link>
+              </div>
+              <div class="preview-list">
+                <div v-for="material in recentMaterials" :key="material.id" class="preview-item">
+                  <div class="material-info">
+                    <h4>{{ material.title }}</h4>
+                    <p>{{ material.description }}</p>
+                  </div>
+                  <div class="material-stats">
+                    <span>{{ material.questions }} Soal</span>
+                    <span>{{ material.students }} Peserta</span>
+                  </div>
                 </div>
               </div>
-              
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <div class="activity-details">
-                  <p><strong>Admin</strong> menambahkan user baru "Siti Rahayu"</p>
-                  <span>25 menit yang lalu</span>
-                </div>
+            </div>
+            
+            <!-- Question Preview -->
+            <div class="preview-section">
+              <div class="section-header">
+                <h3>Soal Terbaru</h3>
+                <router-link to="/managementsoal" class="view-all">Lihat Semua</router-link>
               </div>
-              
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                  </svg>
-                </div>
-                <div class="activity-details">
-                  <p><strong>Admin</strong> mengupdate materi "CSS Lanjutan"</p>
-                  <span>1 jam yang lalu</span>
+              <div class="preview-list">
+                <div v-for="question in recentQuestions" :key="question.id" class="preview-item">
+                  <div class="question-info">
+                    <p><strong>Soal #{{ question.id }}</strong>: {{ question.text }}</p>
+                    <div class="metadata">
+                      <span>Materi: {{ question.material }}</span>
+                      <span>Kesulitan: 
+                        <span :class="['difficulty', question.difficulty]">{{ question.difficulty }}</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -216,7 +234,7 @@
                 </div>
                 <div class="table-cell">{{ user.email }}</div>
                 <div class="table-cell">
-                  <span :class="['role-badge', user.role]">{{ user.role }}</span>
+                  <span :class="['role-badge', user.role]">{{ getRoleName(user.role) }}</span>
                 </div>
                 <div class="table-cell">
                   <span :class="['status-badge', user.status]">{{ user.status }}</span>
@@ -383,6 +401,7 @@ export default {
   data() {
     return {
       activeTab: 'dashboard',
+      showDropdown: false, // Tambah state untuk dropdown
       users: [
         {
           id: 1,
@@ -508,6 +527,56 @@ export default {
         }
       ]
     }
+  },
+  computed: {
+    totalUsers() {
+      return this.users.length;
+    },
+    totalMaterials() {
+      return this.materials.length;
+    },
+    totalQuestions() {
+      return this.questions.length;
+    },
+    recentUsers() {
+      return this.users.slice(0, 3);
+    },
+    recentMaterials() {
+      return this.materials.slice(0, 3);
+    },
+    recentQuestions() {
+      return this.questions.slice(0, 3);
+    }
+  },
+  methods: {
+    getRoleName(role) {
+      const roles = {
+        'student': 'Siswa',
+        'instructor': 'Instruktur',
+        'admin': 'Admin'
+      };
+      return roles[role] || role;
+    },
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+    },
+    logout() {
+      localStorage.removeItem('token');
+      this.$router.push('/');
+    },
+    handleClickOutside(event) {
+      if (this.showDropdown && !this.$refs.profileContainer.contains(event.target)) {
+        this.showDropdown = false;
+      }
+    }
+  },
+
+  // Tambah event listener untuk menutup dropdown saat klik di luar
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
 }
 </script>
@@ -583,10 +652,31 @@ export default {
   justify-content: center;
 }
 
+/* ADMIN PROFILE DROPDOWN STYLES */
+.admin-profile-container {
+  position: relative;
+}
+
 .admin-profile {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.admin-profile:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-icon {
+  transition: transform 0.3s;
+}
+
+.admin-profile:hover .dropdown-icon {
+  transform: rotate(180deg);
 }
 
 .avatar {
@@ -611,6 +701,44 @@ export default {
 .admin-role {
   font-size: 12px;
   color: #aaa;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  min-width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 15px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdown-menu button:hover {
+  background: #f5f7fa;
+}
+
+.dropdown-menu button svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Main Content */
@@ -725,11 +853,6 @@ export default {
   color: #0984e3;
 }
 
-.stat-icon.activity {
-  background: rgba(232, 67, 147, 0.1);
-  color: #e84393;
-}
-
 .stat-info h3 {
   font-size: 24px;
   margin-bottom: 5px;
@@ -740,66 +863,172 @@ export default {
   font-size: 14px;
 }
 
-/* Recent Activity */
-.recent-activity {
+/* Preview Grid Styles - DIUBAH MENJADI SUSUN KE BAWAH */
+.preview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.preview-section {
   background: white;
   border-radius: 12px;
-  padding: 25px;
+  padding: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.view-all {
-  background: transparent;
-  border: none;
-  color: #4a00e0;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.activity-list {
+.preview-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.activity-item {
-  display: flex;
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
+.preview-item {
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  transition: all 0.3s ease;
 }
 
-.activity-item:last-child {
-  border-bottom: none;
+.preview-item:hover {
+  border-color: #8e2de2;
+  box-shadow: 0 4px 10px rgba(142, 45, 226, 0.1);
 }
 
-.activity-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(74, 0, 224, 0.1);
-  color: #4a00e0;
+.user-info {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-right: 15px;
-  flex-shrink: 0;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
-.activity-details p {
-  margin-bottom: 5px;
-  color: #333;
+.user-info .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
 
-.activity-details span {
+.user-name {
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.user-email {
+  font-size: 13px;
+  color: #666;
+}
+
+.material-info h4 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.material-info p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.material-stats {
+  display: flex;
+  gap: 15px;
+  font-size: 13px;
+  color: #666;
+}
+
+.question-info p {
+  margin-bottom: 10px;
+  line-height: 1.5;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: #666;
+}
+
+.difficulty {
+  padding: 3px 8px;
+  border-radius: 20px;
   font-size: 12px;
-  color: #999;
+  font-weight: 500;
+}
+
+.difficulty.mudah {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.difficulty.sedang {
+  background: rgba(241, 196, 15, 0.1);
+  color: #f1c40f;
+}
+
+.difficulty.sulit {
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+.role-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.role-badge.student {
+  background: rgba(9, 132, 227, 0.1);
+  color: #0984e3;
+}
+
+.role-badge.instructor {
+  background: rgba(0, 184, 148, 0.1);
+  color: #00b894;
+}
+
+.role-badge.admin {
+  background: rgba(232, 67, 147, 0.1);
+  color: #e84393;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.status-badge.inactive {
+  background: rgba(255, 71, 87, 0.1);
+  color: #ff4757;
+}
+
+.status-badge.published {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.status-badge.draft {
+  background: rgba(241, 196, 15, 0.1);
+  color: #f1c40f;
 }
 
 /* Buttons */
@@ -820,6 +1049,16 @@ export default {
 .primary-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(142, 45, 226, 0.3);
+}
+
+.view-all {
+  background: transparent;
+  border: none;
+  color: #4a00e0;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
 }
 
 /* User Management */
@@ -861,45 +1100,6 @@ export default {
 .user-info .avatar {
   width: 36px;
   height: 36px;
-}
-
-.role-badge {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.role-badge.student {
-  background: rgba(9, 132, 227, 0.1);
-  color: #0984e3;
-}
-
-.role-badge.instructor {
-  background: rgba(0, 184, 148, 0.1);
-  color: #00b894;
-}
-
-.role-badge.admin {
-  background: rgba(232, 67, 147, 0.1);
-  color: #e84393;
-}
-
-.status-badge {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-badge.active {
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
-}
-
-.status-badge.inactive {
-  background: rgba(255, 71, 87, 0.1);
-  color: #ff4757;
 }
 
 .actions {
@@ -1100,36 +1300,6 @@ export default {
   border-top: 1px solid #eee;
 }
 
-.metadata {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  font-size: 13px;
-  color: #666;
-}
-
-.difficulty {
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.difficulty.mudah {
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
-}
-
-.difficulty.sedang {
-  background: rgba(241, 196, 15, 0.1);
-  color: #f1c40f;
-}
-
-.difficulty.sulit {
-  background: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
-}
-
 /* Responsive Styles */
 @media (max-width: 992px) {
   .sidebar {
@@ -1250,6 +1420,19 @@ export default {
       "role"
       "status"
       "actions";
+  }
+  
+  /* Adjust dropdown for mobile */
+  .admin-profile {
+    padding: 5px;
+  }
+  
+  .admin-name, .admin-role {
+    display: none;
+  }
+  
+  .dropdown-menu {
+    min-width: 140px;
   }
 }
 </style>

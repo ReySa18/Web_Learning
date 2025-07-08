@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\MateriController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\TopikController;
+use App\Http\Controllers\SoalController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -17,20 +19,15 @@ use App\Http\Controllers\TopikController;
 // Autentikasi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
-// Tes koneksi
-Route::get('/test', function () {
-    return response()->json(['message' => 'test ok']);
-});
-
 // Materi publik (GET tanpa login)
 Route::get('/materi', [MateriController::class, 'index']);
 
 // Daftar semua user (jika memang dimaksudkan untuk publik, jika tidak, pindahkan ke grup auth)
 Route::get('/users', [UserController::class, 'index']);
-
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/topik', [TopikController::class, 'index']);
+Route::get('/soal', [SoalController::class, 'index']);
+Route::get('/soal/{id}', [SoalController::class, 'show']);
 
 
 
@@ -74,7 +71,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/materi/{id}', [MateriController::class, 'update']); // untuk support _method PUT
     Route::delete('/materi/{id}', [MateriController::class, 'destroy']);
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Soal - hanya user login yang bisa menambah
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/soal', [SoalController::class, 'store']);
+    Route::put('/soal/{id}', [SoalController::class, 'update']);
+    Route::delete('/soal/{id}', [SoalController::class, 'destroy']);
 
 
     /*

@@ -14,15 +14,14 @@
       <div class="form-decoration"></div>
       <h2 class="form-title"><i class="fas fa-edit"></i> Formulir Edit Materi</h2>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label><i class="fas fa-heading"></i> JUDUL</label>
-          <div class="input-wrapper">
-            <i class="fas fa-heading input-icon"></i>
-            <input v-model="materi.judul" type="text" class="input" placeholder="Masukkan judul materi" />
-          </div>
+      <div class="form-group">
+        <label><i class="fas fa-heading"></i> JUDUL</label>
+        <div class="input-wrapper">
+          <i class="fas fa-heading input-icon"></i>
+          <input v-model="materi.judul" type="text" class="input" placeholder="Masukkan judul materi" />
         </div>
       </div>
+      
 
       <div class="form-row">
         <div class="form-group">
@@ -308,31 +307,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Tambahkan style untuk input-icon-right */
-.input-icon-right {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  font-size: 1.1rem;
-}
-
-/* Tambahkan style untuk select agar mirip dengan input */
-.input-wrapper select.input {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background: #f8fafc;
-  cursor: pointer;
-}
-
-/* Tambahkan style untuk loading spinner di button */
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
 /* Style yang sudah ada sebelumnya tetap dipertahankan */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 * {
@@ -757,4 +731,29 @@ label i {
     padding: 20px;
   }
 }
+/* Tambahkan style untuk input-icon-right */
+.input-icon-right {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+/* Tambahkan style untuk select agar mirip dengan input */
+.input-wrapper select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+/* Tambahkan style untuk loading spinner di button */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 </style>

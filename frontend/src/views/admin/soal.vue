@@ -54,7 +54,7 @@
             <span>Dashboard</span>
           </router-link>
           
-          <router-link to="/usermanagement" class="nav-item active">
+          <router-link to="/usermanagement" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
               <circle cx="9" cy="7" r="4"></circle>
@@ -72,7 +72,7 @@
             <span>Manajemen Materi</span>
           </router-link>
           
-          <router-link to="/managementsoal" class="nav-item">
+          <router-link to="/managementsoal" class="nav-item active">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -85,56 +85,52 @@
       
       <!-- Content Area -->
       <div class="content">
-        <!-- User Management Header -->
+        <!-- Question Management Header -->
         <div class="section-header">
-        <div>
-          <h2 class="section-title">Manajemen User</h2>
-          <p class="section-subtitle">Kelola pengguna sistem kursus Anda</p>
-        </div>
-        <div class="actions">
-          <div class="search-container">
-            <input type="text" v-model="searchQuery" placeholder="Cari pengguna...">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+          <div>
+            <h2 class="section-title">Manajemen Soal</h2>
+            <p class="section-subtitle">Kelola soal evaluasi kursus Anda</p>
           </div>
-          <button class="primary-btn" @click="openAddUserModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Tambah User
-          </button>
+          <div class="actions">
+            <div class="search-container">
+              <input type="text" v-model="searchQuery" placeholder="Cari soal...">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <button class="primary-btn" @click="openAddSoalModal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Tambah Soal
+            </button>
+          </div>
         </div>
-      </div>
         
         <!-- Filters and Stats -->
         <div class="filters-stats">
           <div class="filter-controls">
             <div class="filter-group">
-              <label>Peran:</label>
-              <select v-model="roleFilter">
-                <option value="all">Semua Peran</option>
-                <option value="admin">Admin</option>
-                <option value="siswa">Siswa</option>
+              <label>Kategori:</label>
+              <select v-model="categoryFilter">
+                <option value="all">Semua Kategori</option>
+                <option v-for="kategori in categories" :value="kategori.nama" :key="kategori.id">{{ kategori.nama }}</option>
               </select>
             </div>
             
             <div class="filter-group">
-              <label>Status:</label>
-              <select v-model="statusFilter">
-                <option value="all">Semua Status</option>
-                <option value="active">Aktif</option>
-                <option value="inactive">Nonaktif</option>
+              <label>Topik:</label>
+              <select v-model="topicFilter">
+                <option value="all">Semua Topik</option>
+                <option v-for="topik in topics" :value="topik.nama" :key="topik.id">{{ topik.nama }}</option>
               </select>
             </div>
             
             <div class="filter-group">
               <label>Urutkan:</label>
               <select v-model="sortBy">
-                <option value="name">Nama (A-Z)</option>
-                <option value="name_desc">Nama (Z-A)</option>
                 <option value="recent">Terbaru</option>
                 <option value="oldest">Terlama</option>
               </select>
@@ -143,81 +139,66 @@
           
           <div class="user-stats">
             <div class="stat-item">
-              <span class="stat-value">{{ filteredUsers.length }}</span>
-              <span class="stat-label">Total Pengguna</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ activeUserCount }}</span>
-              <span class="stat-label">Pengguna Aktif</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ SiswaCount }}</span>
-              <span class="stat-label">Siswa</span>
+              <span class="stat-value">{{ filteredSoals.length }}</span>
+              <span class="stat-label">Total Soal</span>
             </div>
           </div>
         </div>
         
-        <!-- Users Table -->
+        <!-- managementsoal Table -->
         <div class="users-table">
           <div class="table-header">
             <div class="table-row">
-              <div class="table-cell">Nama Pengguna</div>
-              <div class="table-cell">Email</div>
-              <div class="table-cell">Peran</div>
-              <div class="table-cell">Status</div>
-              <div class="table-cell">Tanggal Bergabung</div>
+              <div class="table-cell">Pertanyaan</div>
+              <div class="table-cell">Topik</div>
+              <div class="table-cell">Kategori</div>
+              <div class="table-cell">Jawaban Benar</div>
               <div class="table-cell">Aksi</div>
             </div>
           </div>
           
           <div class="table-body">
-            <div v-for="user in filteredUsers" :key="user.id" class="table-row">
+            <div v-for="soal in paginatedSoals" :key="soal.id" class="table-row">
               <div class="table-cell">
-                <div class="user-info">
-                  <img :src="user.avatar" :alt="user.name" class="avatar">
+                <div class="soal-info">
+                  <div class="soal-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                  </div>
                   <div>
-                    <div class="user-name">{{ user.name }}</div>
-                    <div class="user-id">ID: {{ user.id }}</div>
+                    <div class="soal-title">{{ truncateText(soal.pertanyaan, 60) }}</div>
+                    <div class="soal-id">ID: {{ soal.id }}</div>
                   </div>
                 </div>
               </div>
               <div class="table-cell">
-                <div class="user-email">{{ user.email }}</div>
-                <div class="user-phone" v-if="user.phone">{{ user.phone }}</div>
+                <div class="soal-topic">{{ soal.topik }}</div>
               </div>
               <div class="table-cell">
-                <select v-model="user.role" @change="updateUserRole(user)" class="role-select">
-                  <option value="admin">Admin</option>
-                  <option value="siswa">Siswa</option>
-                </select>
+                <div class="soal-category">{{ soal.kategori }}</div>
               </div>
               <div class="table-cell">
-                <div class="status-container">
-                  <label class="switch">
-                    <input type="checkbox" v-model="user.status" true-value="active" false-value="inactive" @change="toggleUserStatus(user)">
-                    <span class="slider"></span>
-                  </label>
-                  <span :class="['status-badge', user.status]">{{ user.status === 'active' ? 'Aktif' : 'Nonaktif' }}</span>
+                <div class="correct-answer">
+                  <span class="answer-badge">{{ soal.jawaban_benar }}</span>
                 </div>
               </div>
-              <div class="table-cell">
-                <div class="join-date">{{ user.joinDate }}</div>
-                <div class="last-login" v-if="user.lastLogin">Terakhir login: {{ user.lastLogin }}</div>
-              </div>
+              
               <div class="table-cell actions">
-                <button class="icon-btn edit" @click="openEditUserModal(user)">
+                <button class="icon-btn edit" @click="openEditSoalModal(soal)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
                 </button>
-                <button class="icon-btn delete" @click="confirmDeleteUser(user)">
+                <button class="icon-btn delete" @click="confirmDeleteSoal(soal)">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   </svg>
                 </button>
-
               </div>
             </div>
           </div>
@@ -247,12 +228,12 @@
       </div>
     </div>
     
-    <!-- Add User Modal -->
-    <div v-if="showAddUserModal" class="modal-overlay">
+    <!-- Add Question Modal -->
+    <div v-if="showAddSoalModal" class="modal-overlay">
       <div class="modal">
         <div class="modal-header">
-          <h3>Tambah Pengguna Baru</h3>
-          <button class="close-btn" @click="closeAddUserModal">
+          <h3>Tambah Soal Baru</h3>
+          <button class="close-btn" @click="closeAddSoalModal">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -262,66 +243,73 @@
         
         <div class="modal-body">
           <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" v-model="newUser.name" placeholder="Masukkan nama lengkap">
+            <label>Pertanyaan</label>
+            <textarea v-model="newSoal.pertanyaan" rows="3" placeholder="Masukkan pertanyaan"></textarea>
           </div>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" v-model="newUser.email" placeholder="Masukkan email">
-            </div>
+          <div class="form-group">
+            <label>Topik</label>
+            <select v-model="newSoal.topik">
+              <option v-for="topik in topics" :value="topik.id" :key="topik.id">{{ topik.nama }}</option>
+            </select>
           </div>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label>Peran</label>
-              <select v-model="newUser.role">
-                <option value="siswa">Siswa</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Status</label>
-              <select v-model="newUser.status">
-                <option value="active">Aktif</option>
-                <option value="inactive">Nonaktif</option>
-              </select>
+          <div class="form-group">
+            <label>Kategori</label>
+            <select v-model="newSoal.kategori">
+              <option v-for="kategori in categories" :value="kategori.id" :key="kategori.id">{{ kategori.nama }}</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Pilihan Jawaban</label>
+            <div class="option-input">
+              <div class="option-row">
+                <span class="option-letter">A.</span>
+                <input type="text" v-model="newSoal.pilihan.A" placeholder="Pilihan A">
+              </div>
+              <div class="option-row">
+                <span class="option-letter">B.</span>
+                <input type="text" v-model="newSoal.pilihan.B" placeholder="Pilihan B">
+              </div>
+              <div class="option-row">
+                <span class="option-letter">C.</span>
+                <input type="text" v-model="newSoal.pilihan.C" placeholder="Pilihan C">
+              </div>
+              <div class="option-row">
+                <span class="option-letter">D.</span>
+                <input type="text" v-model="newSoal.pilihan.D" placeholder="Pilihan D">
+              </div>
             </div>
           </div>
           
           <div class="form-group">
-            <label>Password</label>
-            <div class="password-input">
-              <input :type="showPassword ? 'text' : 'password'" v-model="newUser.password" placeholder="Buat password">
-              <button class="toggle-password" @click.prevent="showPassword = !showPassword">
-                <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
+            <label>Jawaban Benar</label>
+            <div class="correct-answer-selector">
+              <button v-for="option in ['A', 'B', 'C', 'D']" 
+                      :key="option" 
+                      class="answer-option"
+                      :class="{ selected: newSoal.jawaban_benar === option }"
+                      @click="newSoal.jawaban_benar = option">
+                {{ option }}
               </button>
             </div>
           </div>
         </div>
         
         <div class="modal-footer">
-          <button class="btn-cancel" @click="closeAddUserModal">Batal</button>
-          <button class="btn-save" @click="addNewUser">Simpan</button>
+          <button class="btn-cancel" @click="closeAddSoalModal">Batal</button>
+          <button class="btn-save" @click="addNewSoal">Simpan</button>
         </div>
       </div>
     </div>
     
-    <!-- Edit User Modal -->
-    <div v-if="showEditUserModal" class="modal-overlay">
+    <!-- Edit Question Modal -->
+    <div v-if="showEditSoalModal" class="modal-overlay">
       <div class="modal">
         <div class="modal-header">
-          <h3>Edit Pengguna</h3>
-          <button class="close-btn" @click="closeEditUserModal">
+          <h3>Edit Soal</h3>
+          <button class="close-btn" @click="closeEditSoalModal">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -331,64 +319,77 @@
         
         <div class="modal-body">
           <div class="user-header">
-            <img :src="editingUser.avatar" :alt="editingUser.name" class="avatar">
+            <div class="soal-icon large">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
             <div>
-              <h4>{{ editingUser.name }}</h4>
-              <p>ID: {{ editingUser.id }}</p>
+              <h4>ID: {{ editingSoal.id }}</h4>
+              <p>Topik: {{ editingSoal.topik }}, Kategori: {{ editingSoal.kategori }}</p>
             </div>
           </div>
           
           <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" v-model="editingUser.name">
+            <label>Pertanyaan</label>
+            <textarea v-model="editingSoal.pertanyaan" rows="3" placeholder="Masukkan pertanyaan"></textarea>
           </div>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" v-model="editingUser.email">
-            </div>
+          <div class="form-group">
+            <label>Topik</label>
+            <select v-model="editingSoal.topik">
+              <option v-for="topik in topics" :value="topik.id" :key="topik.id">{{ topik.nama }}</option>
+            </select>
           </div>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label>Peran</label>
-              <select v-model="editingUser.role">
-                <option value="siswa">Siswa</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Status</label>
-              <select v-model="editingUser.status">
-                <option value="active">Aktif</option>
-                <option value="inactive">Nonaktif</option>
-              </select>
+          <div class="form-group">
+            <label>Kategori</label>
+            <select v-model="editingSoal.kategori">
+              <option v-for="kategori in categories" :value="kategori.id" :key="kategori.id">{{ kategori.nama }}</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Pilihan Jawaban</label>
+            <div class="option-input">
+              <div class="option-row">
+                <span class="option-letter">A.</span>
+                <input type="text" v-model="editingSoal.pilihan.A" placeholder="Pilihan A">
+              </div>
+              <div class="option-row">
+                <span class="option-letter">B.</span>
+                <input type="text" v-model="editingSoal.pilihan.B" placeholder="Pilihan B">
+              </div>
+              <div class="option-row">
+                <span class="option-letter">C.</span>
+                <input type="text" v-model="editingSoal.pilihan.C" placeholder="Pilihan C">
+              </div>
+              <div class="option-row">
+                <span class="option-letter">D.</span>
+                <input type="text" v-model="editingSoal.pilihan.D" placeholder="Pilihan D">
+              </div>
             </div>
           </div>
           
           <div class="form-group">
-            <label>Reset Password</label>
-            <div class="password-input">
-              <input :type="showEditPassword ? 'text' : 'password'" v-model="resetPassword" placeholder="Masukkan password baru">
-              <button class="toggle-password" @click.prevent="showEditPassword = !showEditPassword">
-                <svg v-if="showEditPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
+            <label>Jawaban Benar</label>
+            <div class="correct-answer-selector">
+              <button v-for="option in ['A', 'B', 'C', 'D']" 
+                      :key="option" 
+                      class="answer-option"
+                      :class="{ selected: editingSoal.jawaban_benar === option }"
+                      @click="editingSoal.jawaban_benar = option">
+                {{ option }}
               </button>
             </div>
           </div>
         </div>
         
         <div class="modal-footer">
-          <button class="btn-cancel" @click="closeEditUserModal">Batal</button>
-          <button class="btn-save" @click="saveUserChanges">Simpan Perubahan</button>
+          <button class="btn-cancel" @click="closeEditSoalModal">Batal</button>
+          <button class="btn-save" @click="saveSoalChanges">Simpan Perubahan</button>
         </div>
       </div>
     </div>
@@ -401,13 +402,14 @@
         </div>
         
         <div class="modal-body">
-          <p>Anda yakin ingin menghapus pengguna <strong>{{ userToDelete.name }}</strong>?</p>
-          <p class="warning-text">Aksi ini tidak dapat dibatalkan dan semua data pengguna akan dihapus permanen.</p>
+          <p>Anda yakin ingin menghapus soal berikut?</p>
+          <p><strong>{{ soalToDelete.pertanyaan }}</strong></p>
+          <p class="warning-text">Aksi ini tidak dapat dibatalkan dan data soal akan dihapus permanen.</p>
         </div>
         
         <div class="modal-footer">
           <button class="btn-cancel" @click="showDeleteConfirmation = false">Batal</button>
-          <button class="btn-delete" @click="deleteUser">Hapus Pengguna</button>
+          <button class="btn-delete" @click="deleteSoal">Hapus Soal</button>
         </div>
       </div>
     </div>
@@ -415,290 +417,268 @@
 </template>
 
 <script>
-import axios from 'axios';
 import { useToast } from 'vue-toastification';
-
+import axios from 'axios';
 
 export default {
-  name: 'UserManagement',
+  name: 'ManagementSoal',
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       showDropdown: false,
       searchQuery: '',
-      roleFilter: 'all',
-      statusFilter: 'all',
+      categoryFilter: 'all',
+      topicFilter: 'all',
       sortBy: 'recent',
       currentPage: 1,
       itemsPerPage: 8,
-      showAddUserModal: false,
-      showEditUserModal: false,
+      showAddSoalModal: false,
+      showEditSoalModal: false,
       showDeleteConfirmation: false,
-      showPassword: false,
-      showEditPassword: false,
-      resetPassword: '',
-      newUser: {
+      newSoal: {
         id: '',
-        name: '',
-        email: '',
-        phone: '',
-        role: 'siswa',
-        status: 'active',
-        password: '',
-        joinDate: this.getCurrentDate(),
-        lastLogin: '',
-        avatar: ''
+        pertanyaan: '',
+        topik: '',
+        kategori: '',
+        pilihan: { A: '', B: '', C: '', D: '' },
+        jawaban_benar: 'A',
+        createdAt: ''
       },
-      editingUser: {},
-      userToDelete: {},
-      users: [], // <-- Awalnya kosong, akan diisi dari API
+      editingSoal: {
+        id: '',
+        pertanyaan: '',
+        topik: '',
+        kategori: '',
+        pilihan: { A: '', B: '', C: '', D: '' },
+        jawaban_benar: 'A'
+      },
+      soalToDelete: {},
+      categories: [],
+      topics: [],
+      soals: []
     };
   },
   computed: {
-    filteredUsers() {
-      let filtered = this.users;
+    filteredSoals() {
+    let filtered = this.soals;
+    const query = this.searchQuery.toLowerCase();
 
-      if (this.searchQuery) {
-        const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(user =>
-          user.name.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query) ||
-          (user.phone && user.phone.includes(query))
+    if (this.searchQuery) {
+        filtered = filtered.filter(soal =>
+        soal.pertanyaan.toLowerCase().includes(query) ||
+        soal.topik.toLowerCase().includes(query) ||
+        soal.kategori.toLowerCase().includes(query)
         );
-      }
+    }
 
-      if (this.roleFilter !== 'all') {
-        filtered = filtered.filter(user => user.role === this.roleFilter);
-      }
+    if (this.categoryFilter !== 'all') {
+        filtered = filtered.filter(soal => soal.kategori === this.categoryFilter);
+    }
 
-      if (this.statusFilter !== 'all') {
-        filtered = filtered.filter(user => user.status === this.statusFilter);
-      }
+    if (this.topicFilter !== 'all') {
+        filtered = filtered.filter(soal => soal.topik === this.topicFilter);
+    }
 
-      if (this.sortBy === 'name') {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (this.sortBy === 'name_desc') {
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-      } else if (this.sortBy === 'recent') {
-        filtered.sort((a, b) => new Date(b.joinDate) - new Date(a.joinDate));
-      } else if (this.sortBy === 'oldest') {
-        filtered.sort((a, b) => new Date(a.joinDate) - new Date(b.joinDate));
-      }
+    if (this.sortBy === 'recent') {
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (this.sortBy === 'oldest') {
+        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
 
-      return filtered;
+    return filtered;
     },
-    activeUserCount() {
-      return this.users.filter(user => user.status === 'active').length;
-    },
-    SiswaCount() {
-      return this.users.filter(user => user.role === 'siswa').length;
-    },
+
     totalPages() {
-      return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
+      return Math.ceil(this.filteredSoals.length / this.itemsPerPage);
     },
-    paginatedUsers() {
+    paginatedSoals() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.filteredUsers.slice(start, end);
+      return this.filteredSoals.slice(start, end);
     }
   },
   methods: {
-    async fetchUsers() {
-      const toast = useToast();
+    truncateText(text, maxLength) {
+      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    },
+    async fetchCategories() {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const response = await axios.get('http://localhost:8000/api/kategori', {
+            headers: { Authorization: `Bearer ${token}` }
+            });
+            this.categories = response.data; // Jangan .map(item => item.nama)
+        } catch (error) {
+            console.error('Gagal memuat kategori:', error);
+            this.toast.error('Gagal memuat kategori');
+        }
+    },
+
+    async fetchTopics() {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const response = await axios.get('http://localhost:8000/api/topik', {
+            headers: { Authorization: `Bearer ${token}` }
+            });
+            this.topics = response.data; // Jangan .map(item => item.nama)
+        } catch (error) {
+            console.error('Gagal memuat topik:', error);
+            this.toast.error('Gagal memuat topik');
+        }
+    },
+
+    getKategoriId(nama) {
+    const found = this.categories.find(k => k.nama === nama);
+    return found ? found.id : null;
+    },
+
+    getTopikId(nama) {
+    const found = this.topics.find(t => t.nama === nama);
+    return found ? found.id : null;
+    },
+    async fetchSoals() {
       try {
         const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/users', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const response = await axios.get('http://localhost:8000/api/soal', {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        this.users = response.data.map(user => ({
-          ...user,
-          status: 'active', // default value
-          phone: user.phone || '',
-          avatar: this.getRandomAvatar(),
-          joinDate: this.formatDate(user.created_at), // Gunakan tanggal dari server
-          lastLogin: '-' // Placeholder
+        this.soals = response.data.map(item => ({
+          id: item.id,
+          pertanyaan: item.pertanyaan,
+          topik: item.topik?.nama || '',
+          kategori: item.kategori?.nama || '',
+          pilihan: {
+            A: item.opsi_a || '',
+            B: item.opsi_b || '',
+            C: item.opsi_c || '',
+            D: item.opsi_d || ''
+          },
+          jawaban_benar: item.jawaban_benar || 'A',
+          createdAt: item.created_at || new Date().toISOString()
         }));
       } catch (error) {
-        console.error('Gagal memuat user:', error);
-        toast.error('Gagal memuat data pengguna dari server.');
+        this.toast.error('Gagal memuat soal dari server');
+        console.error('❌ Gagal memuat soal:', error);
       }
     },
-    getCurrentDate() {
-      const now = new Date();
-      return now.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-    },
-    formatDate(dateString) {
-      if (!dateString) return this.getCurrentDate();
-      
-      const date = new Date(dateString);
+    formatDate(dateStr) {
+      const date = new Date(dateStr);
       return date.toLocaleDateString('id-ID', {
         day: '2-digit',
         month: 'short',
         year: 'numeric'
       });
     },
-    getRandomAvatar() {
-      const gender = Math.random() > 0.5 ? 'men' : 'women';
-      const id = Math.floor(Math.random() * 99);
-      return `https://randomuser.me/api/portraits/${gender}/${id}.jpg`;
-    },
-    openAddUserModal() {
-      this.newUser = {
+    openAddSoalModal() {
+      this.newSoal = {
         id: '',
-        name: '',
-        email: '',
-        phone: '',
-        role: 'siswa',
-        status: 'active',
-        password: '',
-        joinDate: this.getCurrentDate(),
-        lastLogin: '',
-        avatar: this.getRandomAvatar()
+        pertanyaan: '',
+        topik: '',
+        kategori: '',
+        pilihan: { A: '', B: '', C: '', D: '' },
+        jawaban_benar: 'A',
+        createdAt: this.getCurrentDate()
       };
-      this.showAddUserModal = true;
+      this.showAddSoalModal = true;
     },
-    closeAddUserModal() {
-      this.showAddUserModal = false;
+    closeAddSoalModal() {
+      this.showAddSoalModal = false;
     },
-    openEditUserModal(user) {
-    this.editingUser = JSON.parse(JSON.stringify(user));
-    this.showEditUserModal = true;
+    openEditSoalModal(soal) {
+      this.editingSoal = { ...soal };
+      this.showEditSoalModal = true;
     },
-    closeEditUserModal() {
-      this.showEditUserModal = false;
-      this.resetPassword = '';
+    closeEditSoalModal() {
+      this.showEditSoalModal = false;
     },
-    confirmDeleteUser(user) {
-      this.userToDelete = { ...user };
+    confirmDeleteSoal(soal) {
+      this.soalToDelete = { ...soal };
       this.showDeleteConfirmation = true;
     },
-    // Di method addNewUser
-    async addNewUser() {
+    getCurrentDate() {
+      return new Date().toISOString();
+    },
+    async addNewSoal() {
       try {
         const token = localStorage.getItem('auth_token');
-        const toast = useToast();
-        
-        // Gunakan endpoint yang benar sesuai route Laravel
-        const response = await axios.post('http://localhost:8000/api/admin/users', {
-          name: this.newUser.name,
-          email: this.newUser.email,
-          password: this.newUser.password,
-          role: this.newUser.role,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
 
-        // Perbaiki cara menambahkan user baru ke state
-        this.users.push({
-          ...response.data.user,
-          avatar: this.getRandomAvatar(),
-          joinDate: this.getCurrentDate(),
-          lastLogin: '-',
-          status: 'active',
-          phone: ''
-        });
-        
-        this.showAddUserModal = false;
-        toast.success('Pengguna berhasil ditambahkan');
-      } catch (error) {
-        console.error('Gagal tambah user:', error);
-        
-        if (error.response) {
-          console.error('Detail error:', error.response.data);
-          
-          // Tampilkan pesan error spesifik dari server
-          if (error.response.data.errors) {
-            const errors = Object.values(error.response.data.errors).flat();
-            toast.error(errors.join(', ') || 'Gagal menambahkan pengguna.');
-          } else {
-            toast.error(error.response.data.message || 'Gagal menambahkan pengguna.');
-          }
-        } else {
-          toast.error('Terjadi kesalahan jaringan atau server.');
-        }
-      }
-    },
-    async saveUserChanges() {
-      const toast = useToast();
-      const token = localStorage.getItem('auth_token');
+        const payload = {
+        kategori_id: this.newSoal.kategori,
+        topik_id: this.newSoal.topik,       
+        pertanyaan: this.newSoal.pertanyaan,
+        opsi_a: this.newSoal.pilihan.A,
+        opsi_b: this.newSoal.pilihan.B,
+        opsi_c: this.newSoal.pilihan.C,
+        opsi_d: this.newSoal.pilihan.D,
+        jawaban_benar: this.newSoal.jawaban_benar
+        };
 
-      const payload = {
-        name: this.editingUser.name,
-        email: this.editingUser.email,
-        role: this.editingUser.role,
-        ...(this.resetPassword ? { password: this.resetPassword } : {})
-      };
-
-      try {
-        await axios.put(
-          `http://localhost:8000/api/admin/users/${this.editingUser.id}`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        // Update array lokal
-        const index = this.users.findIndex(u => u.id === this.editingUser.id);
-        if (index !== -1) {
-          this.users[index] = {
-            ...this.users[index], 
-            ...this.editingUser, 
-          };
-        }
-
-        this.showEditUserModal = false;
-        this.resetPassword = '';
-        toast.success('Perubahan pengguna berhasil disimpan');
-      } catch (error) {
-        console.error('Gagal menyimpan perubahan:', error);
-
-        if (error.response?.data?.errors) {
-          const errors = Object.values(error.response.data.errors).flat();
-          toast.error(errors.join(', '));
-        } else {
-          toast.error(error.response?.data?.message || 'Terjadi kesalahan saat menyimpan perubahan');
-        }
-      }
-    },
-
-    async deleteUser() {
-      const token = localStorage.getItem('auth_token');
-      const toast = useToast();
-      try {
-        const response = await axios.delete(`http://localhost:8000/api/users/${this.userToDelete.id}`, {
+        await axios.post('http://localhost:8000/api/soal', payload, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
-        // Hapus dari daftar lokal
-        this.users = this.users.filter(user => user.id !== this.userToDelete.id);
-
-        this.showDeleteConfirmation = false;
-        toast.success('Pengguna berhasil dihapus');
+        this.toast.success('Soal berhasil ditambahkan!');
+        this.fetchSoals();
+        this.closeAddSoalModal();
       } catch (error) {
-        console.error('Gagal menghapus user:', error);
-        toast.error('Gagal menghapus pengguna dari server.');
+        console.log(error.response?.data?.errors);
+        this.toast.error('Terjadi kesalahan saat menyimpan soal');
+        console.error(error);
       }
     },
-    updateUserRole(user) {
-      toast.info(`Peran ${user.name} diubah menjadi ${user.role}`);
+    async saveSoalChanges() {
+      const token = localStorage.getItem('auth_token');
+
+      const payload = {
+        kategori_id: this.editingSoal.kategori,
+        topik_id: this.editingSoal.topik,
+        pertanyaan: this.editingSoal.pertanyaan,
+        opsi_a: this.editingSoal.pilihan.A,
+        opsi_b: this.editingSoal.pilihan.B,
+        opsi_c: this.editingSoal.pilihan.C,
+        opsi_d: this.editingSoal.pilihan.D,
+        jawaban_benar: this.editingSoal.jawaban_benar
+      };
+
+      try {
+        await axios.put(`http://localhost:8000/api/soal/${this.editingSoal.id}`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        this.toast.success('Soal berhasil diperbarui!');
+        this.fetchSoals(); // refresh list soal dari server
+        this.closeEditSoalModal();
+      } catch (error) {
+        this.toast.error('Gagal memperbarui soal');
+        console.error('❌ Error saat update soal:', error);
+      }
     },
-    toggleUserStatus(user) {
-      toast.info(`Status ${user.name} diubah menjadi ${user.status}`);
+    async deleteSoal() {
+      const id = this.soalToDelete.id;
+      const token = localStorage.getItem('auth_token');
+
+      try {
+        await axios.delete(`http://localhost:8000/api/soal/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        this.toast.success('Soal berhasil dihapus');
+        this.fetchSoals(); 
+        this.showDeleteConfirmation = false;
+      } catch (error) {
+        this.toast.error('Gagal menghapus soal');
+        console.error('❌ Error saat menghapus soal:', error);
+      }
     },
     getRoleName(role) {
       const roles = {
@@ -722,14 +702,17 @@ export default {
     }
   },
   mounted() {
-    this.fetchUsers();
     document.addEventListener('click', this.handleClickOutside);
+    this.fetchSoals();
+    this.fetchCategories();
+    this.fetchTopics();
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside);
   }
 }
 </script>
+
 
 
 <style scoped>
@@ -803,6 +786,7 @@ export default {
   justify-content: center;
 }
 
+/* ADMIN PROFILE DROPDOWN STYLES */
 .admin-profile-container {
   position: relative;
 }
@@ -1102,7 +1086,7 @@ export default {
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr 1.5fr auto;
+  grid-template-columns: 3fr 1fr 1fr 1fr auto;
   padding: 15px 20px;
   border-bottom: 1px solid #eee;
 }
@@ -1117,126 +1101,68 @@ export default {
   font-size: 14px;
 }
 
-.user-info {
+.soal-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.user-info .avatar {
+.soal-icon {
   width: 40px;
   height: 40px;
-}
-
-.user-name {
-  font-weight: 500;
-}
-
-.user-id {
-  font-size: 12px;
-  color: #777;
-}
-
-.user-email {
-  font-weight: 500;
-}
-
-.user-phone {
-  font-size: 12px;
-  color: #777;
-  margin-top: 3px;
-}
-
-.role-select {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: white;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.role-select:hover {
-  border-color: #8e2de2;
-}
-
-.status-container {
+  background: #f0f5ff;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  color: #4a00e0;
 }
 
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 22px;
+.soal-icon.large {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+.soal-title {
+  font-weight: 500;
+  line-height: 1.4;
 }
 
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 34px;
+.soal-id {
+  font-size: 12px;
+  color: #777;
 }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #2ecc71;
-}
-
-input:checked + .slider:before {
-  transform: translateX(18px);
-}
-
-.status-badge {
+.soal-topic, .soal-category {
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+  display: inline-block;
 }
 
-.status-badge.active {
+.soal-topic {
+  background: rgba(74, 0, 224, 0.1);
+  color: #4a00e0;
+}
+
+.soal-category {
   background: rgba(46, 204, 113, 0.1);
   color: #2ecc71;
 }
 
-.status-badge.inactive {
-  background: rgba(255, 71, 87, 0.1);
-  color: #ff4757;
-}
-
-.join-date {
-  font-weight: 500;
-}
-
-.last-login {
-  font-size: 12px;
-  color: #777;
-  margin-top: 3px;
+.correct-answer .answer-badge {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #4a00e0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 .actions {
@@ -1271,14 +1197,6 @@ input:checked + .slider:before {
 
 .icon-btn.delete:hover {
   background: rgba(231, 76, 60, 0.1);
-}
-
-.icon-btn.view {
-  color: #9b59b6;
-}
-
-.icon-btn.view:hover {
-  background: rgba(155, 89, 182, 0.1);
 }
 
 /* Pagination */
@@ -1336,7 +1254,7 @@ input:checked + .slider:before {
 .modal {
   background: white;
   border-radius: 12px;
-  width: 500px;
+  width: 600px;
   max-width: 90%;
   max-height: 90vh;
   overflow-y: auto;
@@ -1346,7 +1264,7 @@ input:checked + .slider:before {
 .confirmation-modal {
   background: white;
   border-radius: 12px;
-  width: 400px;
+  width: 500px;
   max-width: 90%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
@@ -1388,11 +1306,6 @@ input:checked + .slider:before {
   margin-bottom: 20px;
 }
 
-.user-header .avatar {
-  width: 60px;
-  height: 60px;
-}
-
 .user-header h4 {
   font-size: 18px;
   margin-bottom: 5px;
@@ -1415,7 +1328,7 @@ input:checked + .slider:before {
   font-weight: 500;
 }
 
-.form-group input, 
+.form-group textarea,
 .form-group select {
   width: 100%;
   padding: 10px 15px;
@@ -1423,42 +1336,79 @@ input:checked + .slider:before {
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
 }
 
-.form-group input:focus, 
+.form-group textarea:focus,
 .form-group select:focus {
   border-color: #8e2de2;
   outline: none;
   box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
 }
 
-.form-row {
+.option-input {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.option-row {
   display: flex;
-  gap: 15px;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
 
-.form-row .form-group {
+.option-row:last-child {
+  border-bottom: none;
+}
+
+.option-letter {
+  font-weight: bold;
+  width: 24px;
+  margin-right: 10px;
+}
+
+.option-row input {
   flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-.password-input {
-  position: relative;
+.option-row input:focus {
+  border-color: #8e2de2;
+  outline: none;
 }
 
-.password-input input {
-  padding-right: 40px;
+.correct-answer-selector {
+  display: flex;
+  gap: 10px;
 }
 
-.toggle-password {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  color: #777;
+.answer-option {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f5f7fa;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
   cursor: pointer;
-  padding: 5px;
+  transition: all 0.2s ease;
+}
+
+.answer-option:hover {
+  background: #eef2f7;
+}
+
+.answer-option.selected {
+  background: #4a00e0;
+  color: white;
+  border-color: #4a00e0;
 }
 
 .warning-text {
@@ -1518,11 +1468,7 @@ input:checked + .slider:before {
 /* Responsive Styles */
 @media (max-width: 1200px) {
   .table-row {
-    grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
-  }
-  
-  .table-cell:last-child {
-    grid-column: span 1;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
   }
 }
 
@@ -1559,35 +1505,31 @@ input:checked + .slider:before {
   .table-row {
     grid-template-columns: 1fr 1fr;
     grid-template-areas: 
-      "user user"
-      "email role"
-      "status date"
+      "pertanyaan pertanyaan"
+      "topik kategori"
+      "jawaban jawaban"
       "actions actions";
     gap: 15px;
     padding: 15px;
   }
   
   .table-cell:nth-child(1) {
-    grid-area: user;
+    grid-area: pertanyaan;
   }
   
   .table-cell:nth-child(2) {
-    grid-area: email;
+    grid-area: topik;
   }
   
   .table-cell:nth-child(3) {
-    grid-area: role;
+    grid-area: kategori;
   }
   
   .table-cell:nth-child(4) {
-    grid-area: status;
+    grid-area: jawaban;
   }
   
   .table-cell:nth-child(5) {
-    grid-area: date;
-  }
-  
-  .table-cell:nth-child(6) {
     grid-area: actions;
     justify-content: flex-end;
   }
@@ -1640,11 +1582,10 @@ input:checked + .slider:before {
   .table-row {
     grid-template-columns: 1fr;
     grid-template-areas: 
-      "user"
-      "email"
-      "role"
-      "status"
-      "date"
+      "pertanyaan"
+      "topik"
+      "kategori"
+      "jawaban"
       "actions";
   }
   
