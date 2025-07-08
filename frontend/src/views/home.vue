@@ -129,7 +129,7 @@
                 <span class="text-xs">Home</span>
                 <div class="absolute top-0 w-1.5 h-1 bg-white rounded-full"></div>
             </router-link>
-            <router-link to="/materi" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
+            <router-link to="/kelas" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 <span class="text-xs">Materi</span>
             </router-link>
@@ -158,12 +158,11 @@ const fetchMateri = async () => {
     const response = await axios.get('http://localhost:8000/api/materi')
     articles.value = response.data.map((item) => ({
       id: item.id,
-      tag: item.label,
-      tagClass: getTagClass(item.label),
+      tag: item.kategori?.nama,
+      tagClass: getTagClass(item.kategori?.nama),
       title: item.judul,
       description: item.deskripsi,
       author: '@admin',
-      progressWidth: getRandomProgressWidth(),
     }))
   } catch (error) {
     console.error('Gagal mengambil data materi:', error)

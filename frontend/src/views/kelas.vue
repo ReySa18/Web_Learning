@@ -120,11 +120,13 @@
 
         <!-- Responsive card grid -->
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          <div
+          <router-link 
             v-for="card in filteredArticles"
             :key="card.id"
+            :to="`/isiMateri/${card.id}`"
             class="card-gradient rounded-xl p-4 md:p-6 card-hover transform transition-all duration-300 hover:shadow-xl"
           >
+            <!-- Konten card tetap sama -->
             <div class="flex items-center justify-between mb-3 md:mb-4">
               <div :class="card.tagClass" class="px-2 py-1 md:px-3 md:py-1 rounded-full">
                 <span class="text-white text-xs font-medium">{{ card.tag }}</span>
@@ -133,7 +135,6 @@
                 <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
-                <span class="text-gray-300 text-xs">{{ card.rating.toFixed(1) }}</span>
               </div>
             </div>
             <h3 class="text-lg md:text-xl font-semibold text-white mb-2 md:mb-3 leading-tight">
@@ -142,16 +143,7 @@
             <p class="text-gray-300 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">
               {{ card.description }}
             </p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <div class="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center mr-2">
-                  <span class="text-white text-xs font-medium">{{ card.author.charAt(0) }}</span>
-                </div>
-                <span class="text-gray-400 text-xs">{{ card.author }}</span>
-              </div>
-              <span class="text-gray-400 text-xs">{{ card.duration }} menit</span>
-            </div>
-          </div>
+          </router-link>
         </div>
       </div>
 
@@ -238,14 +230,11 @@ const fetchMateri = async () => {
 
     articles.value = data.map(item => ({
       id: item.id,
-      tag: item.label,
-      tagClass: getTagClass(item.label),
+      tag: item.kategori?.nama,
+      tagClass: getTagClass(item.kategori?.nama),
       title: item.judul,
       description: item.deskripsi,
-      author: '@admin',
-      duration: Math.floor(Math.random() * 30) + 15,
-      rating: parseFloat((Math.random() * 2 + 3).toFixed(1)),
-      progressWidth: `${Math.floor(Math.random() * 50) + 30}px`,
+      author: 'admin',
     }))
 
     applyFilters()
@@ -293,9 +282,6 @@ const applyFilters = () => {
       break
     case 'oldest':
       result.sort((a, b) => a.id - b.id)
-      break
-    case 'popular':
-      result.sort((a, b) => b.rating - a.rating)
       break
   }
 

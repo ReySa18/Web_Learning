@@ -21,6 +21,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 // Materi publik (GET tanpa login)
 Route::get('/materi', [MateriController::class, 'index']);
+Route::get('/materi/{id}', [MateriController::class, 'show']);
 
 // Daftar semua user (jika memang dimaksudkan untuk publik, jika tidak, pindahkan ke grup auth)
 Route::get('/users', [UserController::class, 'index']);
@@ -67,7 +68,6 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::post('/materi', [MateriController::class, 'store']);
     Route::put('/materi/{id}', [MateriController::class, 'update']);
-    Route::get('/materi/{id}', [MateriController::class, 'show']);
     Route::post('/materi/{id}', [MateriController::class, 'update']); // untuk support _method PUT
     Route::delete('/materi/{id}', [MateriController::class, 'destroy']);
 
