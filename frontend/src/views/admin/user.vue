@@ -20,8 +20,8 @@
           <div class="admin-profile" @click="toggleDropdown">
             <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="avatar">
             <div>
-              <p class="admin-name">Admin User</p>
-              <p class="admin-role">Super Admin</p>
+              <p class="admin-name">{{ adminProfile?.name || 'Admin User' }}</p>
+              <p class="admin-role">{{ adminProfile?.role ? getRoleName(adminProfile.role) : 'Super Admin' }}</p>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -423,6 +423,7 @@ export default {
   name: 'UserManagement',
   data() {
     return {
+      adminProfile: null,
       showDropdown: false,
       searchQuery: '',
       roleFilter: 'all',
@@ -523,6 +524,20 @@ export default {
       } catch (error) {
         console.error('Gagal memuat user:', error);
         toast.error('Gagal memuat data pengguna dari server.');
+      }
+    },
+    async fetchAdminProfile() {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await axios.get('http://localhost:8000/api/user', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.adminProfile = response.data;
+      } catch (error) {
+        console.error('Gagal memuat profil admin:', error);
+        useToast().error('Gagal memuat profil admin');
       }
     },
     getCurrentDate() {
@@ -703,7 +718,6 @@ export default {
     getRoleName(role) {
       const roles = {
         'student': 'Siswa',
-        'instructor': 'Instruktur',
         'admin': 'Admin'
       };
       return roles[role] || role;
@@ -722,6 +736,7 @@ export default {
     }
   },
   mounted() {
+    this.fetchAdminProfile();
     this.fetchUsers();
     document.addEventListener('click', this.handleClickOutside);
   },

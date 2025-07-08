@@ -20,8 +20,8 @@
           <div class="admin-profile" @click="toggleDropdown">
             <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="avatar">
             <div>
-              <p class="admin-name">Admin User</p>
-              <p class="admin-role">Super Admin</p>
+                <p class="admin-name">{{ adminProfile?.name || 'Admin User' }}</p>
+                <p class="admin-role">{{ adminProfile?.role ? getRoleName(adminProfile.role) : 'Super Admin' }}</p>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -88,7 +88,7 @@
         <!-- Dashboard View -->
         <div v-if="activeTab === 'dashboard'" class="dashboard-view">
           <h2 class="section-title">Dashboard Admin</h2>
-          <p class="section-subtitle">Selamat datang kembali, Admin User. Berikut ringkasan aktivitas kursus.</p>
+          <p class="section-subtitle">Selamat datang kembali, Admin. Berikut ringkasan aktivitas kursus.</p>
           
           <!-- Stats Cards -->
           <div class="stats-grid">
@@ -169,10 +169,6 @@
                     <h4>{{ material.title }}</h4>
                     <p>{{ material.description }}</p>
                   </div>
-                  <div class="material-stats">
-                    <span>{{ material.questions }} Soal</span>
-                    <span>{{ material.students }} Peserta</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -188,10 +184,8 @@
                   <div class="question-info">
                     <p><strong>Soal #{{ question.id }}</strong>: {{ question.text }}</p>
                     <div class="metadata">
-                      <span>Materi: {{ question.material }}</span>
-                      <span>Kesulitan: 
-                        <span :class="['difficulty', question.difficulty]">{{ question.difficulty }}</span>
-                      </span>
+                      <span>Topik: {{ question.material }}</span>
+                      <span>Kategori: {{ question.kategori }}</span>
                     </div>
                   </div>
                 </div>
@@ -305,7 +299,6 @@
                       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                       <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
-                    <span>{{ material.questions }} Soal</span>
                   </div>
                   <div class="stat">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -314,7 +307,6 @@
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
-                    <span>{{ material.students }} Peserta</span>
                   </div>
                 </div>
               </div>
@@ -382,9 +374,6 @@
                 <div class="metadata">
                   <span>Materi: {{ question.material }}</span>
                   <span>Jawaban: {{ question.answer }}</span>
-                  <span>Kesulitan: 
-                    <span :class="['difficulty', question.difficulty]">{{ question.difficulty }}</span>
-                  </span>
                 </div>
               </div>
             </div>
@@ -396,136 +385,19 @@
 </template>
 
 <script>
+import axios from 'axios';
+import { useToast } from 'vue-toastification';
+
 export default {
   name: 'AdminDashboard',
   data() {
     return {
       activeTab: 'dashboard',
-      showDropdown: false, // Tambah state untuk dropdown
-      users: [
-        {
-          id: 1,
-          name: 'Budi Santoso',
-          email: 'budi@example.com',
-          role: 'student',
-          status: 'active',
-          avatar: 'https://randomuser.me/api/portraits/men/41.jpg'
-        },
-        {
-          id: 2,
-          name: 'Siti Rahayu',
-          email: 'siti@example.com',
-          role: 'student',
-          status: 'active',
-          avatar: 'https://randomuser.me/api/portraits/women/32.jpg'
-        },
-        {
-          id: 3,
-          name: 'Ahmad Fauzi',
-          email: 'ahmad@example.com',
-          role: 'instructor',
-          status: 'active',
-          avatar: 'https://randomuser.me/api/portraits/men/22.jpg'
-        },
-        {
-          id: 4,
-          name: 'Dewi Anggraeni',
-          email: 'dewi@example.com',
-          role: 'admin',
-          status: 'active',
-          avatar: 'https://randomuser.me/api/portraits/women/68.jpg'
-        },
-        {
-          id: 5,
-          name: 'Rudi Hartono',
-          email: 'rudi@example.com',
-          role: 'student',
-          status: 'inactive',
-          avatar: 'https://randomuser.me/api/portraits/men/64.jpg'
-        }
-      ],
-      materials: [
-        {
-          id: 1,
-          title: 'HTML Dasar',
-          description: 'Belajar dasar-dasar HTML untuk pemula',
-          questions: 25,
-          students: 120,
-          status: 'published',
-          lastUpdate: '2 hari lalu'
-        },
-        {
-          id: 2,
-          title: 'CSS Lanjutan',
-          description: 'Menguasai teknik CSS modern dan layouting',
-          questions: 32,
-          students: 85,
-          status: 'published',
-          lastUpdate: '1 minggu lalu'
-        },
-        {
-          id: 3,
-          title: 'JavaScript Pemula',
-          description: 'Pengenalan pemrograman JavaScript untuk pemula',
-          questions: 45,
-          students: 210,
-          status: 'published',
-          lastUpdate: '3 hari lalu'
-        },
-        {
-          id: 4,
-          title: 'React Fundamental',
-          description: 'Membangun aplikasi web dengan React.js',
-          questions: 38,
-          students: 65,
-          status: 'draft',
-          lastUpdate: '5 hari lalu'
-        }
-      ],
-      questions: [
-        {
-          id: 1,
-          text: 'Manakah dari berikut ini yang BUKAN merupakan tag HTML5 semantik?',
-          options: [
-            '<header>',
-            '<footer>',
-            '<section>',
-            '<div>',
-            '<article>'
-          ],
-          answer: 'D',
-          material: 'HTML Dasar',
-          difficulty: 'mudah'
-        },
-        {
-          id: 2,
-          text: 'Properti CSS manakah yang digunakan untuk mengubah warna teks?',
-          options: [
-            'text-color',
-            'font-color',
-            'color',
-            'text-style',
-            'font-style'
-          ],
-          answer: 'C',
-          material: 'CSS Lanjutan',
-          difficulty: 'mudah'
-        },
-        {
-          id: 3,
-          text: 'Manakah dari berikut ini yang merupakan cara yang benar untuk mendeklarasikan variabel di JavaScript?',
-          options: [
-            'variable name;',
-            'v name;',
-            'var name;',
-            'let name;',
-            'const name;'
-          ],
-          answer: 'C, D, E',
-          material: 'JavaScript Pemula',
-          difficulty: 'sedang'
-        }
-      ]
+      showDropdown: false,
+      users: [],
+      materials: [],
+      questions: [],
+      adminProfile: null // Tambah state untuk profil admin
     }
   },
   computed: {
@@ -552,7 +424,6 @@ export default {
     getRoleName(role) {
       const roles = {
         'student': 'Siswa',
-        'instructor': 'Instruktur',
         'admin': 'Admin'
       };
       return roles[role] || role;
@@ -561,18 +432,119 @@ export default {
       this.showDropdown = !this.showDropdown;
     },
     logout() {
-      localStorage.removeItem('token');
+      localStorage.removeItem('auth_token');
       this.$router.push('/');
     },
     handleClickOutside(event) {
       if (this.showDropdown && !this.$refs.profileContainer.contains(event.target)) {
         this.showDropdown = false;
       }
+    },
+    formatDate(dateString) {
+      if (!dateString) return '-';
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('id-ID', options);
+    },
+    async fetchAdminProfile() {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await axios.get('http://localhost:8000/api/user', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.adminProfile = response.data;
+      } catch (error) {
+        console.error('Gagal memuat profil admin:', error);
+        useToast().error('Gagal memuat profil admin');
+      }
+    },
+    async fetchUsers() {
+      const toast = useToast();
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await axios.get('http://localhost:8000/api/users', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        this.users = response.data.map(user => ({
+          ...user,
+          status: 'active',
+          avatar: user.avatar || this.getRandomAvatar(),
+          joinDate: this.formatDate(user.created_at),
+          lastLogin: '-'
+        }));
+      } catch (error) {
+        console.error('Gagal memuat user:', error);
+        toast.error('Gagal memuat data pengguna dari server.');
+      }
+    },
+    async fetchMaterials() {
+      const toast = useToast();
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await axios.get('http://localhost:8000/api/materi', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        this.materials = response.data.map(item => ({
+          id: item.id,
+          title: item.judul,
+          description: item.deskripsi || 'Tidak ada deskripsi',
+          status: item.status || 'published',
+          lastUpdate: this.formatDate(item.updated_at),
+          created_at: item.created_at
+        }));
+      } catch (error) {
+        console.error('Gagal memuat materi:', error);
+        toast.error('Gagal memuat materi dari server');
+      }
+    },
+    async fetchSoals() {
+      const toast = useToast();
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await axios.get('http://localhost:8000/api/soal', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        this.questions = response.data.map(item => ({
+          id: item.id,
+          text: item.pertanyaan,
+          material: item.topik?.nama || 'Tidak ada topik',
+          kategori: item.kategori?.nama,
+          options: [
+            item.opsi_a,
+            item.opsi_b,
+            item.opsi_c,
+            item.opsi_d
+          ],
+          answer: item.jawaban_benar,
+          created_at: item.created_at
+        }));
+      } catch (error) {
+        console.error('Gagal memuat soal:', error);
+        toast.error('Gagal memuat soal dari server');
+      }
+    },
+    getRandomAvatar() {
+      const randomId = Math.floor(Math.random() * 100);
+      return `https://randomuser.me/api/portraits/men/${randomId}.jpg`;
     }
   },
-
-  // Tambah event listener untuk menutup dropdown saat klik di luar
-  mounted() {
+  async mounted() {
+    // Panggil semua fungsi fetch
+    await this.fetchAdminProfile();
+    await this.fetchUsers();
+    await this.fetchMaterials();
+    await this.fetchSoals();
+    
     document.addEventListener('click', this.handleClickOutside);
   },
   beforeUnmount() {

@@ -20,8 +20,8 @@
           <div class="admin-profile" @click="toggleDropdown">
             <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="avatar">
             <div>
-              <p class="admin-name">Admin User</p>
-              <p class="admin-role">Super Admin</p>
+              <p class="admin-name">{{ adminProfile?.name || 'Admin User' }}</p>
+              <p class="admin-role">{{ adminProfile?.role ? getRoleName(adminProfile.role) : 'Super Admin' }}</p>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -64,7 +64,7 @@
             <span>Manajemen User</span>
           </router-link>
           
-          <router-link to="/materials" class="nav-item active">
+          <router-link to="/materi" class="nav-item active">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
@@ -316,6 +316,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import { useToast } from 'vue-toastification';
 
 export default {
@@ -326,6 +327,7 @@ export default {
   },
   data() {
     return {
+      adminProfile: null,
       showDropdown: false,
       searchQuery: '',
       categoryFilter: 'all',
@@ -402,6 +404,27 @@ export default {
     }
   },
 methods: {
+  getRoleName(role) {
+    const roles = {
+      'student': 'Siswa',
+      'admin': 'Admin'
+    };
+    return roles[role] || role;
+  },
+  async fetchAdminProfile() {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await axios.get('http://localhost:8000/api/user', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      this.adminProfile = response.data;
+    } catch (error) {
+      console.error('Gagal memuat profil admin:', error);
+      useToast().error('Gagal memuat profil admin');
+    }
+  },
   async fetchMaterials() {
     try {
       const response = await fetch('http://localhost:8000/api/materi', {
@@ -559,14 +582,6 @@ methods: {
       });
     }
   },
-  getRoleName(role) {
-    const roles = {
-      'student': 'Siswa',
-      'instructor': 'Instruktur',
-      'admin': 'Admin'
-    };
-    return roles[role] || role;
-  },
   toggleDropdown() {
     this.showDropdown = !this.showDropdown;
   },
@@ -579,13 +594,13 @@ methods: {
         this.showDropdown = false;
       }
   }
-
 },
 
 mounted() {
   document.addEventListener('click', this.handleClickOutside);
   this.fetchMaterials();
   this.fetchTopics();
+  this.fetchAdminProfile();
 },
 beforeUnmount() {
   document.removeEventListener('click', this.handleClickOutside);
