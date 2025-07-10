@@ -543,7 +543,7 @@ export default {
     async fetchSoals() {
       try {
         const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/soal', {
+        const response = await axios.get('http://localhost:8000/api/admin/soal', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -1172,7 +1172,6 @@ export default {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #4a00e0;
   color: white;
   display: flex;
   align-items: center;

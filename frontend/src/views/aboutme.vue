@@ -113,12 +113,12 @@
             <div class="flex flex-col items-center">
               <div class="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+                  src="/images/foto.png"
                   class="w-full h-full object-cover"
                   alt="Developer Photo"
                 >
               </div>
-              <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Reymondo Saputra Simbolon</h2>
+              <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Reymondo Saputra S</h2>
               <p class="text-blue-400 text-sm md:text-base mb-3">Tech Antusiast</p>
               <div class="flex space-x-3 mb-4">
                 <a href="https://github.com/ReySa18" class="p-2 glass-effect rounded-full hover:bg-blue-500 transition-colors">

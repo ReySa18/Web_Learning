@@ -508,7 +508,7 @@ export default {
       const toast = useToast();
       try {
         const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/soal', {
+        const response = await axios.get('http://localhost:8000/api/admin/soal', {
           headers: {
             Authorization: `Bearer ${token}`
           }

@@ -29,7 +29,7 @@ Route::get('/materi/{id}', [MateriController::class, 'show']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/topik', [TopikController::class, 'index']);
-Route::get('/soal', [SoalController::class, 'index']);
+Route::get('/admin/soal', [SoalController::class, 'index']);
 Route::get('/soal', [SoalController::class, 'getByKategoriAndTopik']);
 Route::get('/latihan/list', [SoalController::class, 'getLatihanList']);
 
