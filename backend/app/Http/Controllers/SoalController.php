@@ -77,5 +77,37 @@ class SoalController extends Controller
 
         return response()->json(['message' => 'Soal berhasil dihapus'], 200);
     }
+
+    public function getByKategoriAndTopik(Request $request)
+    {
+        $request->validate([
+            'kategori_id' => 'required|exists:kategori,id',
+            'topik_id' => 'required|exists:topik,id',
+        ]);
+
+        $soals = Soal::where('kategori_id', $request->kategori_id)
+                     ->where('topik_id', $request->topik_id)
+                     ->with(['kategori', 'topik']) // jika ada relasi
+                     ->get();
+
+        return response()->json([
+            'message' => 'Daftar soal berdasarkan kategori dan topik',
+            'data' => $soals
+        ]);
+    }
+
+    public function getLatihanList()
+    {
+        $kuisList = Soal::with(['kategori', 'topik'])
+            ->select('kategori_id', 'topik_id')
+            ->groupBy('kategori_id', 'topik_id')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $kuisList
+        ]);
+    }
+
 }
 

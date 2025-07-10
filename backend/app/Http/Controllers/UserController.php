@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -101,9 +102,44 @@ class UserController extends Controller
         $user->update($validated);
 
         return response()->json([
-            'message' => 'User updated successfully',
+            'message' => 'User berhasil diupdate',
             'user' => $user
         ]);
+    }
+
+    // Update profil
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+        ]);
+
+        $user->update($validated);
+
+        return response()->json(['message' => 'Profil berhasil diperbarui']);
+    }
+
+    // Update password
+    public function updatePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Password lama salah'], 400);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password berhasil diperbarui']);
     }
 
 }

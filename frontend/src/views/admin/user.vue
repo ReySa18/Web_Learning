@@ -4,7 +4,7 @@
     <div class="top-nav">
       <div class="logo-container">
         <div class="logo">K</div>
-        <h1>KursusAdmin</h1>
+        <h1>AsCodeAdmin</h1>
       </div>
       
       <div class="admin-info">
@@ -727,7 +727,7 @@ export default {
     },
     logout() {
       localStorage.removeItem('token');
-      this.$router.push('/');
+      this.$router.push('/login');
     },
     handleClickOutside(event) {
       if (this.showDropdown && !this.$refs.profileContainer.contains(event.target)) {

@@ -8,6 +8,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\TopikController;
 use App\Http\Controllers\SoalController;
+use App\Http\Controllers\HasilLatihanController;
+
 
 
 /*
@@ -28,7 +30,8 @@ Route::get('/users', [UserController::class, 'index']);
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/topik', [TopikController::class, 'index']);
 Route::get('/soal', [SoalController::class, 'index']);
-Route::get('/soal/{id}', [SoalController::class, 'show']);
+Route::get('/soal', [SoalController::class, 'getByKategoriAndTopik']);
+Route::get('/latihan/list', [SoalController::class, 'getLatihanList']);
 
 
 
@@ -83,8 +86,24 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | User Management (delete user)
+    | User Management (Admin)
     |--------------------------------------------------------------------------
     */
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Menyimpan Hasil latihan
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/hasil-latihan', [HasilLatihanController::class, 'store']);
+    Route::get('/hasil-latihan', [HasilLatihanController::class, 'index']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Data User (User)
+    |--------------------------------------------------------------------------
+    */
+    Route::put('/user', [UserController::class, 'updateProfile']);
+    Route::put('/user/password', [UserController::class, 'updatePassword']);
 });

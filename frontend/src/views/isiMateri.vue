@@ -152,13 +152,13 @@
           <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
           </svg>
-          <span class="text-xs">Kuiz</span>
+          <span class="text-xs">Latihan Soal</span>
         </router-link>
-        <router-link to="/admin" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
+        <router-link to="/aboutme" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
           <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span class="text-xs">contact</span>
+          <span class="text-xs">About Me</span>
         </router-link>
       </div>
     </div>
@@ -251,7 +251,7 @@ const nextMateri = computed(() => {
 
 // Kembali ke halaman sebelumnya
 const goBack = () => {
-  router.go(-1)
+  router.push('/kelas')
 }
 
 // Class warna tag kategori

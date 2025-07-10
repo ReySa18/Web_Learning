@@ -8,22 +8,24 @@
         </svg>
         Kembali
       </button>
-      <h1 class="quiz-title">{{ topic }}</h1>
+      <h1 class="quiz-title">{{ topic }} - {{ category }}</h1>
     </div>
 
     <div class="quiz-content">
       <!-- Overview Panel -->
-      <div class="overview-panel">
+      <div v-if="questions.length > 0 && !showResult" class="overview-panel">
         <h2 class="overview-title">Daftar Soal</h2>
         <div class="question-grid">
           <div 
             v-for="(question, index) in questions" 
-            :key="index"
+            :key="question.id"
             class="question-card"
             :class="{
-              'current': currentQuestion === index,
+              'current': currentQuestionIndex === index,
               'answered': question.answered,
-              'unanswered': !question.answered
+              'unanswered': !question.answered,
+              'correct-answer': showAnswers && question.selected === question.correctAnswer,
+              'wrong-answer': showAnswers && question.answered && question.selected !== question.correctAnswer
             }"
             @click="goToQuestion(index)"
           >
@@ -39,25 +41,26 @@
       </div>
 
       <!-- Question Area -->
-      <div class="question-area">
+      <div v-if="questions.length > 0 && currentQuestion && !showResult" class="question-area">
         <div class="question-display">
           <div class="question-header">
-            <div class="question-number">Soal {{ currentQuestion + 1 }}</div>
-            <div class="question-status" :class="currentQuestionData.answered ? 'answered' : 'unanswered'">
-              {{ currentQuestionData.answered ? 'Terjawab' : 'Belum Dijawab' }}
+            <div class="question-number">Soal {{ currentQuestionIndex + 1 }}</div>
+            <div class="question-status" :class="currentQuestion.answered ? 'answered' : 'unanswered'">
+              {{ currentQuestion.answered ? 'Terjawab' : 'Belum Dijawab' }}
             </div>
           </div>
           
-          <div class="question-text">{{ currentQuestionData.question }}</div>
+          <div class="question-text">{{ currentQuestion.question }}</div>
           
           <div class="options-container">
             <div 
-              v-for="(option, index) in currentQuestionData.options" 
+              v-for="(option, index) in currentQuestion.options" 
               :key="index"
               class="option-item"
               :class="{ 
-                'selected': currentQuestionData.selected === index,
-                'correct': showAnswers && index === currentQuestionData.correctAnswer
+                'selected': currentQuestion.selected === index,
+                'correct': showAnswers && index === currentQuestion.correctAnswer,
+                'incorrect': showAnswers && currentQuestion.selected === index && index !== currentQuestion.correctAnswer
               }"
               @click="selectOption(index)"
             >
@@ -70,14 +73,14 @@
         <div class="question-navigation">
           <button 
             class="nav-button prev-button" 
-            :disabled="currentQuestion === 0"
+            :disabled="currentQuestionIndex === 0"
             @click="prevQuestion"
           >
             Sebelumnya
           </button>
           <button 
             class="nav-button next-button" 
-            :disabled="currentQuestion === questions.length - 1"
+            :disabled="currentQuestionIndex === questions.length - 1"
             @click="nextQuestion"
           >
             Selanjutnya
@@ -87,9 +90,100 @@
             v-if="answeredCount === questions.length"
             @click="submitQuiz"
           >
-            Selesaikan Kuis
+            Selesaikan Latihan
           </button>
         </div>
+      </div>
+
+      <!-- Result Area -->
+      <div v-if="showResult && !viewingAnswers" class="result-container">
+        <h2 class="result-title">Hasil Latihan</h2>
+        
+        <div class="score-card">
+          <div class="score-value">{{ score }}%</div>
+          <div class="score-text">Skor Akhir</div>
+          <div class="score-detail">
+            <div class="detail-item">
+              <span class="detail-label">Jawaban Benar:</span>
+              <span class="detail-value">{{ correctAnswers }} / {{ questions.length }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Jawaban Salah:</span>
+              <span class="detail-value">{{ questions.length - correctAnswers }} / {{ questions.length }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="result-actions">
+          <button class="review-button" @click="viewAnswers">
+            Lihat Hasil Pengerjaan
+          </button>
+          <button class="restart-button" @click="restartQuiz">
+            Latihan Ulang
+          </button>
+          <button class="exit-button" @click="goBack">
+            Keluar
+          </button>
+        </div>
+      </div>
+
+      <!-- Review Answers Area -->
+      <div v-if="viewingAnswers && showResult" class="review-container">
+        <h2 class="review-title">Review Hasil Pengerjaan</h2>
+        
+        <div class="review-questions">
+          <div v-for="(question, index) in questions" :key="index" class="review-question">
+            <div class="review-question-header">
+              <div class="review-question-number">Soal {{ index + 1 }}</div>
+              <div class="review-status" :class="isAnswerCorrect(question) ? 'correct' : 'incorrect'">
+                {{ isAnswerCorrect(question) ? 'Benar' : 'Salah' }}
+              </div>
+            </div>
+            
+            <div class="review-question-text">{{ question.question }}</div>
+            
+            <div class="review-options">
+              <div 
+                v-for="(option, optIndex) in question.options" 
+                :key="optIndex"
+                class="review-option"
+                :class="{ 
+                  'selected': question.selected === optIndex,
+                  'correct': optIndex === question.correctAnswer,
+                  'incorrect': question.selected === optIndex && optIndex !== question.correctAnswer
+                }"
+              >
+                <div class="review-option-letter">{{ String.fromCharCode(65 + optIndex) }}</div>
+                <div class="review-option-text">{{ option }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="review-actions">
+          <button class="back-to-result" @click="viewingAnswers = false">
+            Kembali ke Hasil
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div v-else-if="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Memuat soal...</p>
+      </div>
+
+      <!-- Empty state -->
+      <div v-else-if="questions.length === 0" class="empty-state">
+        <div class="empty-illustration">
+          <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <p class="empty-message">Tidak ada soal untuk kategori dan topik ini</p>
+        <button class="back-button" @click="goBack">Kembali</button>
       </div>
     </div>
 
@@ -101,95 +195,32 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'QuizPage',
   data() {
     return {
-      topic: "Pemrograman Web Lanjut",
-      currentQuestion: 0,
+      topic: "",
+      category: '',
+      currentQuestionIndex: 0,
       showAnswers: false,
+      showResult: false,
+      viewingAnswers: false,
+      loading: true,
       notification: {
         show: false,
         message: '',
         type: ''
       },
-      questions: [
-        {
-          question: "Manakah dari berikut ini yang BUKAN merupakan framework JavaScript?",
-          options: ["React", "Vue", "Angular", "Django", "Svelte"],
-          answered: false,
-          selected: null,
-          correctAnswer: 3
-        },
-        {
-          question: "Apa kepanjangan dari SPA dalam konteks pengembangan web?",
-          options: ["Single Page Application", "Server Page Application", "Structured Programming Approach", "Secure Protocol Architecture", "Simple Page Architecture"],
-          answered: false,
-          selected: null,
-          correctAnswer: 0
-        },
-        {
-          question: "Manakah yang merupakan hook Vue untuk memantau perubahan data?",
-          options: ["onMounted", "computed", "watch", "ref", "reactive"],
-          answered: false,
-          selected: null,
-          correctAnswer: 2
-        },
-        {
-          question: "Apa tujuan utama dari Vuex dalam ekosistem Vue?",
-          options: ["Routing", "State Management", "Server Communication", "UI Components", "Form Validation"],
-          answered: false,
-          selected: null,
-          correctAnswer: 1
-        },
-        {
-          question: "Metode HTTP manakah yang digunakan untuk memperbarui data di server?",
-          options: ["GET", "POST", "PUT", "DELETE", "HEAD"],
-          answered: false,
-          selected: null,
-          correctAnswer: 2
-        },
-        {
-          question: "Manakah dari berikut ini yang BUKAN konsep pemrograman fungsional?",
-          options: ["Immutability", "Pure Functions", "Side Effects", "Class Inheritance", "Higher-Order Functions"],
-          answered: false,
-          selected: null,
-          correctAnswer: 3
-        },
-        {
-          question: "Apa yang dimaksud dengan CORS dalam pengembangan web?",
-          options: ["Cross-Origin Resource Sharing", "Centralized Object Request System", "Component-Oriented Routing Service", "Cascading Object Response Syntax", "Client-Side Origin Resolution"],
-          answered: false,
-          selected: null,
-          correctAnswer: 0
-        },
-        {
-          question: "Manakah yang merupakan fitur ES6 JavaScript?",
-          options: ["Arrow Functions", "Callback Functions", "Prototype Inheritance", "XMLHttpRequest", "IIFE"],
-          answered: false,
-          selected: null,
-          correctAnswer: 0
-        },
-        {
-          question: "Apa fungsi utama dari npm dalam ekosistem JavaScript?",
-          options: ["Package Management", "Native Platform Modules", "Network Performance Monitoring", "New Project Management", "Node Process Manager"],
-          answered: false,
-          selected: null,
-          correctAnswer: 0
-        },
-        {
-          question: "Manakah yang BUKAN merupakan metode lifecycle Vue?",
-          options: ["created", "mounted", "updated", "destroyed", "initialized"],
-          answered: false,
-          selected: null,
-          correctAnswer: 4
-        }
-      ]
+      questions: [],
+      score: 0,
+      correctAnswers: 0
     };
   },
   computed: {
-    currentQuestionData() {
-      return this.questions[this.currentQuestion];
+    currentQuestion() {
+      return this.questions[this.currentQuestionIndex];
     },
     answeredCount() {
       return this.questions.filter(q => q.answered).length;
@@ -199,37 +230,157 @@ export default {
     }
   },
   methods: {
+    async fetchQuestions() {
+      try {
+        this.loading = true;
+        this.questions = [];
+
+        // Ambil parameter dari route
+        const kategoriId = this.$route.params.kategori_id;
+        const topikId = this.$route.params.topik_id;
+
+        // Fetch soal berdasarkan kategori_id dan topik_id
+        const response = await axios.get(`http://localhost:8000/api/soal?kategori_id=${kategoriId}&topik_id=${topikId}`);
+        const soalList = response.data.data; 
+
+        // Set judul topik dari soal pertama
+        if (soalList.length > 0) {
+          this.topic = soalList[0].topik.nama;
+          this.category = soalList[0].kategori.nama;
+        }
+
+        // Transformasi struktur data
+        this.questions = soalList.map(soal => ({
+          id: soal.id,
+          question: soal.pertanyaan,
+          options: [
+            soal.opsi_a,
+            soal.opsi_b,
+            soal.opsi_c,
+            soal.opsi_d
+          ],
+          answered: false,
+          selected: null,
+          correctAnswer: this.getCorrectIndex(soal.jawaban_benar),
+        }));
+
+      } catch (error) {
+        console.error('Error fetching questions:', error);
+        this.showNotification('Gagal memuat soal', 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+    async saveResultToServer() {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || !user.id) {
+          this.showNotification('User tidak ditemukan. Harap login ulang.', 'error');
+          return;
+        }
+
+        const payload = {
+          user_id: user.id,
+          kategori_id: parseInt(this.$route.params.kategori_id),
+          topik_id: parseInt(this.$route.params.topik_id),
+          skor: this.score,
+          jumlah_benar: this.correctAnswers,
+          jumlah_salah: this.questions.length - this.correctAnswers,
+          tanggal_latihan: new Date().toISOString().split('T')[0] // Format: yyyy-mm-dd
+        };
+
+        const token = localStorage.getItem('auth_token');
+
+        const response = await axios.post('http://localhost:8000/api/hasil-latihan', payload, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        console.log('Hasil latihan berhasil disimpan:', response.data);
+
+      } catch (error) {
+        console.error('Gagal menyimpan hasil:', error);
+        this.showNotification('Gagal menyimpan hasil latihan', 'error');
+      }
+    },
+    getCorrectIndex(jawaban) {
+      const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+      const index = map[jawaban?.toUpperCase()];
+      if (index === undefined) {
+        console.warn(`Jawaban tidak valid: "${jawaban}"`);
+        return -1;
+      }
+      return index;
+    },
     goBack() {
-      this.showNotification("Kuis disimpan sebagai draft", "info");
+      this.$router.push('/kuis');
     },
     goToQuestion(index) {
-      this.currentQuestion = index;
+      this.currentQuestionIndex = index;
     },
     prevQuestion() {
-      if (this.currentQuestion > 0) {
-        this.currentQuestion--;
+      if (this.currentQuestionIndex > 0) {
+        this.currentQuestionIndex--;
       }
     },
     nextQuestion() {
-      if (this.currentQuestion < this.questions.length - 1) {
-        this.currentQuestion++;
+      if (this.currentQuestionIndex < this.questions.length - 1) {
+        this.currentQuestionIndex++;
       }
     },
     selectOption(index) {
-      this.currentQuestionData.selected = index;
-      this.currentQuestionData.answered = true;
+      if (this.showAnswers || this.viewingAnswers) return; // Tidak bisa pilih jika sudah submit
       
-      if (!this.showAnswers) {
-        setTimeout(() => {
-          if (this.currentQuestion < this.questions.length - 1) {
-            this.currentQuestion++;
-          }
-        }, 500);
-      }
+      this.currentQuestion.selected = index;
+      this.currentQuestion.answered = true;
     },
     submitQuiz() {
       this.showAnswers = true;
-      this.showNotification("Kuis berhasil diselesaikan!", "success");
+      this.calculateScore();
+
+      setTimeout(() => {
+        this.showResult = true;
+        this.showNotification(`Latihan berhasil diselesaikan! Skor: ${this.score}%`, "success");
+
+        // Simpan hasil latihan ke backend
+        this.saveResultToServer();
+
+      }, 100);
+    },
+    calculateScore() {
+      let correctCount = 0;
+      this.questions.forEach(question => {
+        if (question.selected === question.correctAnswer) {
+          correctCount++;
+        }
+      });
+      
+      this.correctAnswers = correctCount;
+      this.score = Math.round((correctCount / this.questions.length) * 100);
+    },
+    restartQuiz() {
+      // Reset state kuis
+      this.currentQuestionIndex = 0;
+      this.showAnswers = false;
+      this.showResult = false;
+      this.viewingAnswers = false;
+      this.score = 0;
+      this.correctAnswers = 0;
+      
+      // Reset jawaban user
+      this.questions.forEach(question => {
+        question.answered = false;
+        question.selected = null;
+      });
+      
+      this.showNotification("Latihan dimulai ulang", "info");
+    },
+    viewAnswers() {
+      this.viewingAnswers = true;
+    },
+    isAnswerCorrect(question) {
+      return question.selected === question.correctAnswer;
     },
     showNotification(message, type) {
       this.notification = {
@@ -242,6 +393,9 @@ export default {
         this.notification.show = false;
       }, 3000);
     }
+  },
+  mounted() {
+    this.fetchQuestions();
   }
 };
 </script>
@@ -602,6 +756,387 @@ export default {
   color: white;
 }
 
+.loading-state, .empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #aaa;
+  font-size: 1.2rem;
+}
+
+.empty-state button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: linear-gradient(to right, #4a00e0, #8e2de2);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+/* Result Container */
+.result-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-align: center;
+}
+
+.result-title {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #4facfe;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.score-card {
+  background: rgba(30, 30, 30, 0.8);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid #333;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+  margin-bottom: 40px;
+}
+
+.score-value {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  background: linear-gradient(to right, #00b09b, #96c93d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.score-text {
+  font-size: 1.5rem;
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.score-detail {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.detail-item {
+  flex: 1;
+  padding: 15px;
+  border-radius: 10px;
+  background: rgba(40, 40, 40, 0.7);
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 5px;
+}
+
+.detail-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.review-button {
+  background: linear-gradient(to right, #4a00e0, #8e2de2);
+  color: white;
+  padding: 16px 30px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.restart-button {
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+  color: white;
+  padding: 16px 30px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.exit-button {
+  background: linear-gradient(to right, #ff416c, #ff4b2b);
+  color: white;
+  padding: 16px 30px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.review-button:hover, .restart-button:hover, .exit-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Option incorrect style */
+.incorrect {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: #ff6464;
+  box-shadow: 0 0 15px rgba(255, 100, 100, 0.3);
+}
+
+.incorrect .option-letter {
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: white;
+}
+
+/* Review Container */
+.review-container {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.review-title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #4facfe;
+}
+
+.review-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.review-question {
+  background: rgba(30, 30, 30, 0.8);
+  border-radius: 15px;
+  padding: 25px;
+  border: 1px solid #333;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.review-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #444;
+}
+
+.review-question-number {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #4facfe;
+}
+
+.review-status {
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.review-status.correct {
+  background: rgba(0, 176, 155, 0.2);
+  color: #00b09b;
+}
+
+.review-status.incorrect {
+  background: rgba(255, 100, 100, 0.2);
+  color: #ff6464;
+}
+
+.review-question-text {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: #e0e0e0;
+}
+
+.review-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-option {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-radius: 10px;
+  background: rgba(50, 50, 50, 0.7);
+  border: 2px solid #444;
+}
+
+.review-option.correct {
+  background: rgba(0, 176, 155, 0.2);
+  border-color: #00b09b;
+}
+
+.review-option.incorrect {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: #ff6464;
+}
+
+.review-option.selected {
+  background: rgba(33, 147, 176, 0.2);
+  border-color: #2193b0;
+}
+
+.review-option-letter {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #444;
+  border-radius: 50%;
+  margin-right: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.review-option.correct .review-option-letter {
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  color: white;
+}
+
+.review-option.incorrect .review-option-letter {
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: white;
+}
+
+.review-option.selected .review-option-letter {
+  background: linear-gradient(135deg, #2193b0, #6dd5ed);
+  color: white;
+}
+
+.review-option-text {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.back-to-result {
+  background: linear-gradient(to right, #4a00e0, #8e2de2);
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-to-result:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading state */
+.loading-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #aaa;
+  font-size: 1.2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top: 5px solid #4facfe;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.empty-illustration {
+  margin-bottom: 20px;
+}
+
+.empty-illustration svg {
+  stroke: #4facfe;
+}
+
+.empty-message {
+  font-size: 1.3rem;
+  color: #aaa;
+  margin-bottom: 25px;
+  max-width: 400px;
+}
+
+.empty-state .back-button {
+  background: linear-gradient(to right, #4a00e0, #8e2de2);
+  color: white;
+  padding: 10px 25px;
+  font-size: 1rem;
+}
+
+/* Class untuk kartu soal di overview */
+.correct-answer {
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  border: 2px solid #00b09b;
+}
+
+.wrong-answer {
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  border: 2px solid #ff416c;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
   .quiz-content {
@@ -663,6 +1198,22 @@ export default {
   .question-grid {
     grid-template-columns: repeat(5, 1fr);
   }
+
+  .score-card {
+    padding: 30px 20px;
+  }
+  
+  .score-value {
+    font-size: 3rem;
+  }
+  
+  .result-actions {
+    flex-direction: column;
+  }
+  
+  .score-detail {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 480px) {
@@ -701,6 +1252,22 @@ export default {
     width: 30px;
     height: 30px;
     margin-right: 12px;
+  }
+
+  .result-title {
+    font-size: 1.8rem;
+  }
+  
+  .score-value {
+    font-size: 2.5rem;
+  }
+  
+  .score-text {
+    font-size: 1.2rem;
+  }
+  
+  .review-question {
+    padding: 15px;
   }
 }
 </style>

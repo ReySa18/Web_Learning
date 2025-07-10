@@ -176,12 +176,14 @@
       <div class="mt-4 sm:mt-6 text-center">
         <p class="text-xs sm:text-sm text-gray-400">
           Sudah punya akun? 
-          <button 
-            @click="$emit('go-login')" 
-            class="text-white hover:text-gray-300 font-medium transition-colors underline"
-            >
-            Masuk Disini
-        </button>
+          <router-link to="/">
+            <button 
+              @click="$emit('go-login')" 
+              class="text-white hover:text-gray-300 font-medium transition-colors underline"
+              >
+              Masuk Disini
+            </button>
+          </router-link>
         </p>
       </div>
     </div>
@@ -296,7 +298,7 @@ const handleRegister = async () => {
 
     // Arahkan ke halaman login setelah 2 detik
     setTimeout(() => {
-      router.push('/') // atau '/' sesuai rute login kamu
+      router.push('/login') // atau '/' sesuai rute login kamu
     }, 1000)
   } catch (error) {
     console.error('❌ REGISTER ERROR:', error)

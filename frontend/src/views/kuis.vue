@@ -20,7 +20,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
               </div>
-              <span class="text-white text-lg md:text-xl font-bold">Petani Kode</span>
+              <span class="text-white text-lg md:text-xl font-bold">Asteria Code</span>
             </div>
           </div>
 
@@ -28,26 +28,69 @@
           <div class="hidden md:block">
             <div class="ml-6 md:ml-10 flex items-baseline space-x-3 md:space-x-4">
               <router-link to="/home" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</router-link>
-              <router-link to="/kelas" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kelas</router-link>
-              <router-link to="/kuis" class="nav-active  text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kuiz</router-link>
-              <router-link to="/profile" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">contact</router-link>
+              <router-link to="/kelas" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Materi</router-link>
+              <router-link to="/kuis" class="nav-active  text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Latihan Soal</router-link>
+              <router-link to="/aboutme" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About Me</router-link>
             </div>
           </div>
 
           <!-- Action buttons -->
-          <div class="flex items-center space-x-3 md:space-x-4">
-            <button class="text-gray-300 hover:text-white transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </button>
-            <button class="text-gray-300 hover:text-white transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 011-3.5"></path>
-              </svg>
-            </button>
-            <div class="w-7 h-7 md:w-8 md:h-8 bg-gray-600 rounded-full flex items-center justify-center">
-              <span class="text-white text-xs md:text-sm font-medium">JD</span>
+          <div class="flex items-center space-x-3 md:space-x-4 relative">
+            <div class="relative">
+              <button 
+                @click="toggleDropdown"
+                class="flex items-center space-x-2 focus:outline-none"
+              >
+                <!-- Avatar user -->
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-gray-600 rounded-full flex items-center justify-center">
+                  <!-- Tampilkan inisial jika tidak ada avatar -->
+                  <span v-if="!userData?.avatar" class="text-white text-sm font-medium">
+                    {{ userInitials }}
+                  </span>
+                  <!-- Tampilkan gambar jika ada avatar -->
+                  <img 
+                    v-else
+                    :src="userData?.avatar" 
+                    class="w-full h-full rounded-full object-cover"
+                    alt="User Avatar"
+                  >
+                </div>
+                <!-- Nama user (hanya tampil di desktop) -->
+                <span class="hidden md:inline text-white text-sm font-medium">
+                  {{ userData?.name }}
+                </span>
+                <!-- Icon dropdown -->
+                <svg 
+                  class="w-4 h-4 text-gray-300 transition-transform duration-200" 
+                  :class="{ 'rotate-180': showDropdown }"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Dropdown menu -->
+              <div 
+                v-if="showDropdown"
+                class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 glass-effect border border-gray-700 z-50"
+              >
+                <router-link 
+                  to="/profile" 
+                  class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  @click="showDropdown = false"
+                >
+                  Profile
+                </router-link>
+                <a 
+                  href="#" 
+                  class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  @click="logout"
+                >
+                  Logout
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -60,60 +103,67 @@
         <h1 class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2">Kuis Pembelajaran 📚</h1>
         <p class="text-gray-300 text-sm md:text-base">Uji pengetahuanmu dengan kuis-kuis menarik berikut ini!</p>
         
-        <!-- Category filter -->
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button 
-            v-for="(category, index) in categories" 
-            :key="index"
-            @click="filterByCategory(category)"
-            :class="[
-              'px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors',
-              selectedCategory === category 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            ]"
-          >
-            {{ category }}
+        <!-- Loading state -->
+        <div v-if="loading" class="text-center py-12">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p class="text-gray-400">Memuat kuis...</p>
+        </div>
+
+        <!-- Error state -->
+        <div v-else-if="error" class="text-center py-12">
+          <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+            <svg class="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <p class="text-red-400 mb-4">Gagal memuat data kuis</p>
+          <button @click="fetchQuizzes" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+            Coba Lagi
           </button>
         </div>
+
+        <!-- Content when data is loaded -->
+        <template v-else>
+          <!-- Category filter -->
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button 
+              v-for="(category, index) in categories" 
+              :key="index"
+              @click="filterByCategory(category)"
+              :class="[
+                'px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors',
+                selectedCategory === category 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              ]"
+            >
+              {{ category }}
+            </button>
+          </div>
+        </template>
       </div>
 
       <!-- Quiz cards grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div v-if="!loading && !error" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <div
           v-for="quiz in filteredQuizzes"
           :key="quiz.id"
           class="card-gradient rounded-xl p-4 md:p-6 card-hover transform transition-all duration-300 hover:shadow-xl"
         >
           <div class="flex items-center justify-between mb-3 md:mb-4">
-            <div :class="quiz.tagClass" class="px-2 py-1 md:px-3 md:py-1 rounded-full">
-              <span class="text-white text-xs font-medium">{{ quiz.category }}</span>
-            </div>
-            <div class="flex items-center">
-              <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-              </svg>
-              <span class="text-gray-300 text-xs">{{ quiz.difficulty }}</span>
+            <div :class="getTagClass(quiz.kategori_id)" class="px-2 py-1 md:px-3 md:py-1 rounded-full">
+              <span class="text-white text-xs font-medium">{{ quiz.kategori.nama }}</span>
             </div>
           </div>
           
-          <h3 class="text-lg md:text-xl font-semibold text-white mb-2 md:mb-3 leading-tight">{{ quiz.title }}</h3>
-          <div class="flex items-center text-gray-300 text-xs md:text-sm mb-3 md:mb-4">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-            </svg>
-            {{ quiz.questionCount }} soal • {{ quiz.duration }} menit
-          </div>
+          <h3 class="text-lg md:text-xl font-semibold text-white mb-2 md:mb-3 leading-tight">{{ quiz.topik.nama }} {{ quiz.kategori.nama }}</h3>
           
           <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <div class="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center mr-2">
-                <span class="text-white text-xs font-medium">{{ quiz.authorInitials }}</span>
-              </div>
-              <span class="text-gray-400 text-xs">{{ quiz.author }}</span>
+            <div class="text-gray-400 text-xs">
+              ID: {{ quiz.kategori_id }}-{{ quiz.topik_id }}
             </div>
             <button 
-              @click="startQuiz(quiz.id)"
+              @click="startQuiz(quiz)"
               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
             >
               Mulai Kuis
@@ -122,113 +172,21 @@
         </div>
       </div>
 
-      <!-- Active quiz section -->
-      <div class="mt-10">
-        <h2 class="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Kuis yang Sedang Berlangsung</h2>
-        
-        <div v-if="activeQuizzes.length > 0" class="grid grid-cols-1 gap-4 md:gap-6">
-          <div 
-            v-for="quiz in activeQuizzes" 
-            :key="quiz.id"
-            class="card-gradient rounded-xl p-4 md:p-6"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center">
-                <div :class="quiz.tagClass" class="px-2 py-1 rounded-full mr-3">
-                  <span class="text-white text-xs font-medium">{{ quiz.category }}</span>
-                </div>
-                <span class="text-gray-300 text-xs bg-yellow-500/20 px-2 py-1 rounded">Dalam Proses</span>
-              </div>
-              <span class="text-gray-400 text-xs">{{ quiz.progress }}/{{ quiz.questionCount }} soal</span>
-            </div>
-            
-            <h3 class="text-lg font-semibold text-white mb-2">{{ quiz.title }}</h3>
-            
-            <div class="w-full bg-gray-700 rounded-full h-2 mb-3">
-              <div 
-                class="progress-bar h-2 rounded-full" 
-                :style="{ width: `${(quiz.progress / quiz.questionCount) * 100}%` }"
-              ></div>
-            </div>
-            
-            <div class="flex justify-between">
-              <button 
-                @click="continueQuiz(quiz.id)"
-                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Lanjutkan
-              </button>
-              <button 
-                @click="resetQuiz(quiz.id)"
-                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Ulangi
-              </button>
-            </div>
-          </div>
+      <!-- Empty state -->
+      <div v-if="!loading && !error && filteredQuizzes.length === 0" class="text-center py-12">
+        <div class="inline-block p-4 bg-gray-800 rounded-full mb-4">
+          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
         </div>
-        
-        <div v-else class="text-center py-8">
-          <div class="inline-block p-4 bg-gray-800 rounded-full mb-4">
-            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-            </svg>
-          </div>
-          <p class="text-gray-400">Belum ada kuis yang sedang berlangsung. Pilih kuis di atas untuk memulai!</p>
-        </div>
-      </div>
-
-      <!-- Completed quizzes section -->
-      <div class="mt-10">
-        <h2 class="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Kuis yang Telah Selesai</h2>
-        
-        <div v-if="completedQuizzes.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          <div 
-            v-for="quiz in completedQuizzes" 
-            :key="quiz.id"
-            class="card-gradient rounded-xl p-4 md:p-6"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <div :class="quiz.tagClass" class="px-2 py-1 rounded-full">
-                <span class="text-white text-xs font-medium">{{ quiz.category }}</span>
-              </div>
-              <span class="text-green-400 text-xs bg-green-500/20 px-2 py-1 rounded">Selesai</span>
-            </div>
-            
-            <h3 class="text-lg font-semibold text-white mb-2">{{ quiz.title }}</h3>
-            
-            <div class="flex items-center mb-4">
-              <svg class="w-5 h-5 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-              </svg>
-              <span class="text-white font-medium">{{ quiz.score }}/100</span>
-            </div>
-            
-            <div class="flex justify-between">
-              <button 
-                @click="reviewQuiz(quiz.id)"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-              >
-                Lihat Hasil
-              </button>
-              <button 
-                @click="retakeQuiz(quiz.id)"
-                class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-              >
-                Ulangi
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div v-else class="text-center py-8">
-          <div class="inline-block p-4 bg-gray-800 rounded-full mb-4">
-            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <p class="text-gray-400">Belum ada kuis yang selesai. Selesaikan kuis untuk melihat hasilnya di sini!</p>
-        </div>
+        <p class="text-gray-400 mb-4">Tidak ada kuis yang tersedia</p>
+        <button 
+          v-if="selectedCategory !== 'Semua'" 
+          @click="selectedCategory = 'Semua'"
+          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+        >
+          Tampilkan Semua Kuis
+        </button>
       </div>
     </main>
 
@@ -241,16 +199,18 @@
             </router-link>
             <router-link to="/kelas" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                <span class="text-xs">Kelas</span>
+                <span class="text-xs">Materi</span>
             </router-link>
             <router-link to="/kuis" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                <span class="text-xs">Kuiz</span>
+                <span class="text-xs">Latihan Soal</span>
                 <div class="absolute top-0 w-1.5 h-1 bg-white rounded-full"></div>
             </router-link>
-            <router-link to="/profile" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
-                <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                <span class="text-xs">contact</span>
+            <router-link to="/aboutme" class="flex flex-col items-center py-2 px-3 text-gray-400 group" exact-active-class="text-white">
+                <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-xs">About Me</span>
             </router-link>
         </div>
     </div>
@@ -258,183 +218,144 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
 
-// Categories for filtering
-const categories = ref(['Semua', 'Pemrograman', 'Algoritma', 'Database', 'Web Development', 'Struktur Data']);
+const router = useRouter()
+
+const userData = ref({
+  name: '',
+  email: '',
+  avatar: ''
+})
+const showDropdown = ref(false)
+
+// Ambil inisial dari nama user
+const userInitials = computed(() => {
+  if (!userData.value.name) return 'U'
+  const names = userData.value.name.split(' ')
+  return names
+    .slice(0, 2)
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+})
+
+// Toggle dropdown
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value
+}
+
+// Ambil data user dari API
+const fetchUser = async () => {
+  try {
+    const token = localStorage.getItem('auth_token');
+    const response = await axios.get('http://localhost:8000/api/user', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    userData.value = response.data
+  } catch (error) {
+    console.error('Gagal mengambil data user:', error)
+  }
+}
+
+// Fungsi logout
+const logout = () => {
+  // Hapus token dari localStorage
+  localStorage.removeItem('token')
+  // Redirect ke halaman login
+  router.push({ name: 'Login' })
+}
+
+// Tutup dropdown ketika klik di luar
+const handleClickOutside = (event) => {
+  const dropdown = document.querySelector('.relative > div')
+  if (dropdown && !dropdown.contains(event.target)) {
+    showDropdown.value = false
+  }
+}
+
+
+// Kategori untuk filter
+const categories = ref(['Semua']);
 const selectedCategory = ref('Semua');
 
-// Quiz data
-const quizzes = ref([
-  {
-    id: 1,
-    title: "Dasar Pemrograman C++",
-    category: "Pemrograman",
-    questionCount: 15,
-    duration: 20,
-    difficulty: "Mudah",
-    author: "Budi Setiawan",
-    authorInitials: "BS",
-    tagClass: "tag-gradient",
-  },
-  {
-    id: 2,
-    title: "Struktur Data: Linked List",
-    category: "Struktur Data",
-    questionCount: 10,
-    duration: 15,
-    difficulty: "Sedang",
-    author: "Ani Rahayu",
-    authorInitials: "AR",
-    tagClass: "tag-gradient-4",
-  },
-  {
-    id: 3,
-    title: "Algoritma Sorting",
-    category: "Algoritma",
-    questionCount: 12,
-    duration: 18,
-    difficulty: "Sedang",
-    author: "Citra Dewi",
-    authorInitials: "CD",
-    tagClass: "tag-gradient-3",
-  },
-  {
-    id: 4,
-    title: "SQL Dasar",
-    category: "Database",
-    questionCount: 14,
-    duration: 20,
-    difficulty: "Mudah",
-    author: "Dedi Pratama",
-    authorInitials: "DP",
-    tagClass: "tag-gradient-6",
-  },
-  {
-    id: 5,
-    title: "JavaScript Modern",
-    category: "Web Development",
-    questionCount: 20,
-    duration: 30,
-    difficulty: "Sulit",
-    author: "Eka Surya",
-    authorInitials: "ES",
-    tagClass: "tag-gradient-2",
-  },
-  {
-    id: 6,
-    title: "Object-Oriented Programming",
-    category: "Pemrograman",
-    questionCount: 18,
-    duration: 25,
-    difficulty: "Sedang",
-    author: "Fajar Nugraha",
-    authorInitials: "FN",
-    tagClass: "tag-gradient-5",
-  },
-]);
+// Data kuis
+const quizzes = ref([]);
+const loading = ref(true);
+const error = ref(false);
 
-// Active quizzes (in progress)
-const activeQuizzes = ref([
-  {
-    id: 3,
-    title: "Algoritma Sorting",
-    category: "Algoritma",
-    questionCount: 12,
-    progress: 5,
-    tagClass: "tag-gradient-3",
+// Ambil kuis dari API
+const fetchQuizzes = async () => {
+  try {
+    loading.value = true;
+    error.value = false;
+
+    const response = await axios.get('http://localhost:8000/api/latihan/list');
+    quizzes.value = response.data.data;
+
+    // Ambil nama kategori unik untuk filter
+    const uniqueCategories = [...new Set(quizzes.value.map(q => q.kategori.nama))];
+    categories.value = ['Semua', ...uniqueCategories];
+
+  } catch (err) {
+    console.error('Gagal mengambil data kuis:', err);
+    error.value = true;
+  } finally {
+    loading.value = false;
   }
-]);
+};
 
-// Completed quizzes
-const completedQuizzes = ref([
-  {
-    id: 1,
-    title: "Dasar Pemrograman C++",
-    category: "Pemrograman",
-    questionCount: 15,
-    score: 85,
-    tagClass: "tag-gradient",
-  },
-  {
-    id: 4,
-    title: "SQL Dasar",
-    category: "Database",
-    questionCount: 14,
-    score: 92,
-    tagClass: "tag-gradient-6",
-  }
-]);
 
-// Filter quizzes by category
+
+// Kelas warna berdasarkan kategori ID
+const getTagClass = (kategori_id) => {
+  const classes = [
+    'tag-gradient',
+    'tag-gradient-2',
+    'tag-gradient-3',
+    'tag-gradient-4',
+    'tag-gradient-5',
+    'tag-gradient-6'
+  ];
+  return classes[kategori_id % classes.length] || 'tag-gradient';
+};
+
+// Filter kuis berdasarkan kategori
 const filteredQuizzes = computed(() => {
   if (selectedCategory.value === 'Semua') {
     return quizzes.value;
   }
-  return quizzes.value.filter(quiz => quiz.category === selectedCategory.value);
+  return quizzes.value.filter(quiz => quiz.kategori.nama === selectedCategory.value);
 });
 
-// Filter function
+// Ganti filter kategori
 const filterByCategory = (category) => {
   selectedCategory.value = category;
 };
 
-// Quiz actions
-const startQuiz = (id) => {
-  const quiz = quizzes.value.find(q => q.id === id);
-  if (quiz) {
-    // Check if already active
-    if (!activeQuizzes.value.some(q => q.id === id)) {
-      activeQuizzes.value.push({
-        ...quiz,
-        progress: 0
-      });
+// Navigasi ke halaman soal kuis
+const startQuiz = (quiz) => {
+  router.push({
+    name: 'Soal',
+    params: {
+      kategori_id: quiz.kategori_id,
+      topik_id: quiz.topik_id
     }
-    alert(`Memulai kuis: ${quiz.title}`);
-  }
+  });
 };
 
-const continueQuiz = (id) => {
-  const quiz = activeQuizzes.value.find(q => q.id === id);
-  if (quiz) {
-    alert(`Melanjutkan kuis: ${quiz.title}`);
-  }
-};
-
-const resetQuiz = (id) => {
-  const index = activeQuizzes.value.findIndex(q => q.id === id);
-  if (index !== -1) {
-    activeQuizzes.value.splice(index, 1);
-  }
-};
-
-const reviewQuiz = (id) => {
-  const quiz = completedQuizzes.value.find(q => q.id === id);
-  if (quiz) {
-    alert(`Melihat hasil kuis: ${quiz.title}`);
-  }
-};
-
-const retakeQuiz = (id) => {
-  const quiz = quizzes.value.find(q => q.id === id);
-  if (quiz) {
-    // Remove from completed if exists
-    const completedIndex = completedQuizzes.value.findIndex(q => q.id === id);
-    if (completedIndex !== -1) {
-      completedQuizzes.value.splice(completedIndex, 1);
-    }
-    
-    // Add to active
-    if (!activeQuizzes.value.some(q => q.id === id)) {
-      activeQuizzes.value.push({
-        ...quiz,
-        progress: 0
-      });
-    }
-    alert(`Mengulang kuis: ${quiz.title}`);
-  }
-};
+// Fetch saat komponen dimount
+onMounted(() => {
+  fetchQuizzes();
+  fetchUser()
+  document.addEventListener('click', handleClickOutside)
+});
 </script>
+
 
 <style>
 
@@ -491,6 +412,10 @@ const retakeQuiz = (id) => {
 
 .floating-animation:nth-child(3) {
   animation-delay: -4s;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
 }
 
 @keyframes float {

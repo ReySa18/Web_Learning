@@ -78,11 +78,6 @@
               Ingat saya
             </label>
           </div>
-          <div class="text-sm">
-            <a href="#" class="text-white hover:text-gray-300 transition-colors font-medium">
-              Lupa password?
-            </a>
-          </div>
         </div>
 
         <!-- Login Button -->

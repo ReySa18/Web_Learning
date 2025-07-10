@@ -1,11 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Register from '../views/Register.vue'
+import Register from '../views/register.vue'
 import Login from '../views/login.vue'
 import Home from '../views/home.vue'
 import Kuiz from '../views/kuis.vue'
 import Soal from '../views/Soal.vue'
 import Kelas from '../views/kelas.vue'
+import Profile from '../views/profile.vue'
+import aboutme from '../views/aboutme.vue'
+import landingPage from '../views/landingPage.vue'
 
 import Admin from '../views/admin/admin.vue'
 import UserManagement from '../views/admin/user.vue'
@@ -14,13 +17,18 @@ import Materi from '../views/admin/materi.vue'
 import editMateri from '../views/admin/editMateri.vue'
 import SoalManagement from '../views/admin/soal.vue'
 import isiMateri from '../views/isiMateri.vue'
+import Aboutme from '../views/aboutme.vue'
+import LandingPage from '../views/landingPage.vue'
 
 const routes = [
-  { path: '/', name: 'Login', component: Login },
+  { path: '/', name: 'landingPage', component: LandingPage },
+  { path: '/login', name: 'Login', component: Login },
   { path: '/home', name: 'Home', component: Home },
+  { path: '/aboutme', name: 'AboutMe', component: Aboutme },
   { path: '/register', name: 'Register', component: Register },
   { path: '/kuis', name: 'Kuiz', component: Kuiz },
-  { path: '/soal', name: 'Soal', component: Soal },
+  { path: '/profile', name: 'Profile', component: Profile },  
+  { path: '/soal/:kategori_id/:topik_id', name: 'Soal', component: Soal },
   { path: '/kelas', name: 'Kelas', component: Kelas },
   { path: '/inputMateri', name: 'InputMateri', component: InputMateri },
   { path: '/materi', name: 'Materi', component: Materi },
@@ -60,7 +68,6 @@ const routes = [
   },
   { path: '/managementsoal', name: 'Manajemen Soal', component: SoalManagement },
   { path: '/isiMateri/:id', name: 'isiMateri', component: isiMateri }
-
 ]
 
 const router = createRouter({
