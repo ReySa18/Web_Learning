@@ -22,16 +22,16 @@
             </button>
           </div>
 
-          <div class="flex items-center">
+          <router-link to="/home" class="flex items-center">
             <div class="flex-shrink-0 flex items-center">
               <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-2 md:mr-3">
                 <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
               </div>
-              <span class="text-white text-lg md:text-xl font-bold">Petani Kode</span>
+              <span class="text-white text-lg md:text-xl font-bold">Asteria Code</span>
             </div>
-          </div>
+          </router-link>
 
           <div class="flex items-center">
             <router-link :to="`/kuis/${materiId}`">
@@ -91,7 +91,7 @@
         <!-- Tombol download jika ada gambar -->
         <div v-if="materi.gambar" class="mt-6">
           <a
-            :href="`http://localhost:8000/storage/${materi.gambar}`"
+            :href="`https://asteriacode.my.id/storage/${materi.gambar}`"
             :download="materi.gambar.split('/').pop()"
             class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md"
           >
@@ -168,7 +168,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import api from '@/api';
 
 const route = useRoute()
 const router = useRouter()
@@ -187,11 +187,11 @@ const fetchMateri = async (id) => {
     error.value = null
 
     // Ambil materi detail
-    const response = await axios.get(`http://localhost:8000/api/materi/${id}`)
+    const response = await api.get(`/materi/${id}`)
     materi.value = response.data
 
     // Ambil semua materi untuk navigasi prev/next
-    const materiListResponse = await axios.get('http://localhost:8000/api/materi')
+    const materiListResponse = await api.get('/materi')
     allMateri.value = materiListResponse.data
   } catch (err) {
     console.error('Gagal memuat materi:', err)

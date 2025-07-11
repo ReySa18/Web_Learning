@@ -48,11 +48,15 @@
         <div class="space-y-2">
           <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
           <div class="relative">
+            <!-- Ikon kunci di kiri -->
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
+
+            <!-- Input password -->
             <input 
               id="password"
               v-model="password"
@@ -62,8 +66,28 @@
               :class="password.length > 0 ? 'pr-12' : 'pr-3'"
               placeholder="••••••••"
             >
+
+            <!-- Ikon mata di kanan -->
+            <button type="button"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
+                    @click="showPassword = !showPassword">
+              <!-- Mata terlihat -->
+              <svg v-if="!showPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+
+              <!-- Mata dicoret -->
+              <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.05 10.05 0 012.141-3.528m3.368-2.379A9.973 9.973 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.973 9.973 0 01-4.293 5.043M3 3l18 18" />
+              </svg>
+            </button>
           </div>
         </div>
+
 
         <!-- Remember Me & Forgot Password -->
         <div class="flex items-center justify-between">
@@ -139,16 +163,13 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import api from '@/api'
 import { useRouter } from 'vue-router'
 
-// Emit events
 defineEmits(['go-register'])
 
-// Router instance
 const router = useRouter()
 
-// Reactive data
 const email = ref('')
 const password = ref('')
 const rememberMe = ref(false)
@@ -160,36 +181,35 @@ const notification = ref({
   type: 'success'
 })
 
-// Methods
 const handleLogin = async () => {
   if (!email.value || !password.value) {
-    showNotification('Mohon isi email dan password', 'error')
+    showNotification('Mohon isi email dan password.', 'error')
     return
   }
 
   isLoading.value = true
 
   try {
-    const response = await axios.post('http://localhost:8000/api/login', {
+    // ⬇️ Kirim email & password
+    const response = await api.post('/login', {
       email: email.value,
-      password: password.value,
+      password: password.value
     })
 
-    const token = response.data.token
-    const user = response.data.user
+    const { token, user } = response.data
 
     if (!token || !user) {
       throw new Error('Token atau data pengguna tidak ditemukan.')
     }
 
-    // Simpan token dan user info di localStorage
+    // ⬇️ Simpan data ke localStorage
     localStorage.setItem('auth_token', token)
     localStorage.setItem('user', JSON.stringify(user))
-    localStorage.setItem('user_role', user.role) // ⬅️ Tambahan penting
+    localStorage.setItem('user_role', user.role)
 
-    showNotification('Login berhasil! Selamat datang kembali.', 'success')
+    showNotification('Login berhasil! Selamat datang.', 'success')
 
-    // Arahkan user berdasarkan role
+    // ⬇️ Arahkan sesuai role
     if (user.role === 'admin') {
       router.push('/admin')
     } else {
@@ -200,16 +220,15 @@ const handleLogin = async () => {
     email.value = ''
     password.value = ''
   } catch (error) {
-    showNotification(
-      error.response?.data?.message || 'Login gagal',
-      'error'
-    )
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      'Terjadi kesalahan saat login.'
+    showNotification(message, 'error')
   } finally {
     isLoading.value = false
   }
 }
-
-    
 
 const showNotification = (message, type) => {
   notification.value = {
@@ -223,6 +242,7 @@ const showNotification = (message, type) => {
   }, 3000)
 }
 </script>
+
 
 
 

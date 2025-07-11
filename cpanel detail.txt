@@ -1,0 +1,4 @@
+pw cpanel: RsS-180904
+
+usrnm MySQL: asteria
+pw MySQL: rss18092004

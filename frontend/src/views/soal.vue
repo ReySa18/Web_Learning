@@ -195,7 +195,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api'
 
 export default {
   name: 'QuizPage',
@@ -240,7 +240,7 @@ export default {
         const topikId = this.$route.params.topik_id;
 
         // Fetch soal berdasarkan kategori_id dan topik_id
-        const response = await axios.get(`http://localhost:8000/api/soal?kategori_id=${kategoriId}&topik_id=${topikId}`);
+        const response = await api.get(`/soal?kategori_id=${kategoriId}&topik_id=${topikId}`);
         const soalList = response.data.data; 
 
         // Set judul topik dari soal pertama
@@ -289,13 +289,7 @@ export default {
           tanggal_latihan: new Date().toISOString().split('T')[0] // Format: yyyy-mm-dd
         };
 
-        const token = localStorage.getItem('auth_token');
-
-        const response = await axios.post('http://localhost:8000/api/hasil-latihan', payload, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.post('/hasil-latihan', payload);
 
         console.log('Hasil latihan berhasil disimpan:', response.data);
 

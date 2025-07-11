@@ -25,7 +25,7 @@
     <nav class="glass-effect border-b border-gray-700 sticky top-0 z-50 navbar-height">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div class="flex justify-between items-center h-full">
-          <div class="flex items-center">
+          <router-link to="/home" class="flex items-center">
             <div class="flex-shrink-0 flex items-center">
               <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-2 md:mr-3">
                 <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,14 +34,14 @@
               </div>
               <span class="text-white text-lg md:text-xl font-bold">Asteria Code</span>
             </div>
-          </div>
+          </router-link>
 
           <!-- Desktop Navigation -->
           <div class="hidden md:block">
             <div class="ml-6 md:ml-10 flex items-baseline space-x-3 md:space-x-4">
               <router-link to="/home" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</router-link>
-              <router-link to="/kelas" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kelas</router-link>
-              <router-link to="/kuis" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kuiz</router-link>
+              <router-link to="/kelas" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Materi</router-link>
+              <router-link to="/kuis" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Latihan Soal</router-link>
               <router-link to="/profile" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About Me</router-link>
               <router-link to="/profile" class="nav-active text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Profile</router-link>
             </div>
@@ -395,7 +395,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import api from '@/api'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -536,12 +536,7 @@ const toggleDropdown = () => {
 // Ambil data user dari API
 const fetchUser = async () => {
   try {
-    const token = localStorage.getItem('auth_token');
-    const response = await axios.get('http://localhost:8000/api/user', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const response = await api.get('/user')
     userData.value = response.data
     profileForm.value = {
       name: response.data.name,
@@ -556,12 +551,7 @@ const fetchUser = async () => {
 const fetchHistory = async () => {
   try {
     loadingHistory.value = true
-    const token = localStorage.getItem('auth_token')
-    const response = await axios.get('http://localhost:8000/api/hasil-latihan', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const response = await api.get('/hasil-latihan')
 
     // Map data supaya formatnya cocok
     historyData.value = response.data.map(item => ({
@@ -583,12 +573,7 @@ const fetchHistory = async () => {
 const updateProfile = async () => {
   try {
     isUpdatingProfile.value = true
-    const token = localStorage.getItem('auth_token')
-    await axios.put('http://localhost:8000/api/user', profileForm.value, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    await api.put('/user', profileForm.value)
     
     // Update data user
     userData.value.name = profileForm.value.name
@@ -612,14 +597,9 @@ const updatePassword = async () => {
     }
     
     isUpdatingPassword.value = true
-    const token = localStorage.getItem('auth_token')
-    await axios.put('http://localhost:8000/api/user/password', {
+    await api.put('/user/password', {
       current_password: passwordForm.value.currentPassword,
       new_password: passwordForm.value.newPassword
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
     })
     
     showToast('Password berhasil diperbarui!', 'success')
@@ -646,7 +626,7 @@ const logout = () => {
   // Hapus token dari localStorage
   localStorage.removeItem('auth_token')
   // Redirect ke halaman login
-  router.push({ name: 'Login' })
+  router.push({ name: 'landingPage' })
 }
 
 onMounted(() => {

@@ -13,7 +13,7 @@
     <nav class="glass-effect border-b border-gray-700 sticky top-0 z-50 navbar-height">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div class="flex justify-between items-center h-full">
-          <div class="flex items-center">
+          <router-link to="/home" class="flex items-center">
             <div class="flex-shrink-0 flex items-center">
               <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-2 md:mr-3">
                 <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,7 +22,7 @@
               </div>
               <span class="text-white text-lg md:text-xl font-bold">Asteria Code</span>
             </div>
-          </div>
+          </router-link>
 
           <!-- Desktop Navigation -->
           <div class="hidden md:block">
@@ -220,7 +220,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import api from '@/api';
 
 const router = useRouter()
 
@@ -251,11 +251,7 @@ const toggleDropdown = () => {
 const fetchUser = async () => {
   try {
     const token = localStorage.getItem('auth_token');
-    const response = await axios.get('http://localhost:8000/api/user', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const response = await api.get('/user')
     userData.value = response.data
   } catch (error) {
     console.error('Gagal mengambil data user:', error)
@@ -265,9 +261,9 @@ const fetchUser = async () => {
 // Fungsi logout
 const logout = () => {
   // Hapus token dari localStorage
-  localStorage.removeItem('token')
+  localStorage.removeItem('auth_token')
   // Redirect ke halaman login
-  router.push({ name: 'Login' })
+  router.push({ name: 'landingPage' })
 }
 
 // Tutup dropdown ketika klik di luar
@@ -294,7 +290,7 @@ const fetchQuizzes = async () => {
     loading.value = true;
     error.value = false;
 
-    const response = await axios.get('http://localhost:8000/api/latihan/list');
+    const response = await api.get('/latihan/list');
     quizzes.value = response.data.data;
 
     // Ambil nama kategori unik untuk filter

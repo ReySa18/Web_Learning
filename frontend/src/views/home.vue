@@ -12,7 +12,7 @@
     <nav class="glass-effect border-b border-gray-700 sticky top-0 z-50 navbar-height">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div class="flex justify-between items-center h-full">
-          <div class="flex items-center">
+          <router-link to="/home" class="flex items-center">
             <div class="flex-shrink-0 flex items-center">
               <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-2 md:mr-3">
                 <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
               </div>
               <span class="text-white text-lg md:text-xl font-bold">Asteria Code</span>
             </div>
-          </div>
+          </router-link>
 
           <!-- Desktop Navigation -->
           <div class="hidden md:block">
@@ -76,7 +76,7 @@
                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 glass-effect border border-gray-700 z-50"
               >
                 <router-link 
-                  to="/aboutme" 
+                  to="/profile" 
                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                   @click="showDropdown = false"
                 >
@@ -116,9 +116,10 @@
 
         <!-- Responsive card grid -->
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          <div
+          <router-link 
             v-for="card in articles"
             :key="card.id"
+            :to="`/isiMateri/${card.id}`"
             class="card-gradient rounded-xl p-4 md:p-6 card-hover transform transition-all duration-300 hover:shadow-xl"
           >
             <div class="flex items-center justify-between mb-3 md:mb-4">
@@ -150,7 +151,7 @@
               <span class="text-gray-400 text-xs">{{ card.author }}</span>
               <div class="progress-bar h-1.5 md:h-2 rounded-full" :style="{ width: card.progressWidth }"></div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
 
@@ -193,7 +194,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import axios from 'axios'
+import api from '@/api';
 import { useRouter } from 'vue-router'
 
 
@@ -227,12 +228,7 @@ const toggleDropdown = () => {
 // Ambil data user dari API
 const fetchUser = async () => {
   try {
-    const token = localStorage.getItem('auth_token');
-    const response = await axios.get('http://localhost:8000/api/user', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const response = await api.get('/user');
     userData.value = response.data
   } catch (error) {
     console.error('Gagal mengambil data user:', error)
@@ -241,10 +237,10 @@ const fetchUser = async () => {
 
 // Fungsi logout
 const logout = () => {
-  // Hapus token dari localStorage
-  localStorage.removeItem('token')
+  // Hapus auth_token dari localStorage
+  localStorage.removeItem('auth_token')
   // Redirect ke halaman login
-  router.push({ name: 'Login' })
+  router.push({ name: 'landingPage' })
 }
 
 // Tutup dropdown ketika klik di luar
@@ -257,7 +253,7 @@ const handleClickOutside = (event) => {
 
 const fetchMateri = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/materi')
+    const response = await api.get('/materi')
     articles.value = response.data.map((item) => ({
       id: item.id,
       tag: item.kategori?.nama,
