@@ -69,7 +69,7 @@
           <label class="file-upload-label">
             <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
             <span class="file-upload-text">Unggah File Pendukung</span>
-            <span class="file-upload-hint">Klik untuk memilih file (PDF, DOC, Gambar) atau drag & drop file di sini</span>
+            <span class="file-upload-hint">Klik untuk memilih file (PDF, DOC, Gambar) atau drag & drop file di sini, max 5MB</span>
             <input type="file" class="file-input" ref="fileInput" @change="handleFile" />
           </label>
         </div>
@@ -98,7 +98,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '@/api';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { useRouter } from 'vue-router';
@@ -137,12 +137,7 @@ const editorOptions = {
 const fetchKategori = async () => {
   loadingKategori.value = true;
   try {
-    const token = localStorage.getItem('auth_token');
-    const response = await axios.get('http://localhost:8000/api/kategori', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await api.get('/kategori');
     kategoriList.value = response.data;
 
   } catch (error) {
@@ -158,11 +153,7 @@ const fetchTopik = async () => {
   loadingTopik.value = true;
   try {
     const token = localStorage.getItem('auth_token');
-    const response = await axios.get('http://localhost:8000/api/topik', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await api.get('/topik',);
     topikList.value = response.data;
   } catch (error) {
     console.error('Gagal mengambil data topik:', error);
@@ -223,10 +214,9 @@ const submit = async () => {
   }
 
   try {
-    const response = await axios.post('http://localhost:8000/api/materi', formData, {
+    const response = await api.post('/materi', formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
       }
     });
 

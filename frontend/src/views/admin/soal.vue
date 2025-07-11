@@ -2,10 +2,10 @@
   <div class="admin-dashboard">
     <!-- Top Navigation Bar -->
     <div class="top-nav">
-      <div class="logo-container">
+      <router-link to="/admin" class="logo-container">
         <div class="logo">K</div>
         <h1>AsCodeAdmin</h1>
-      </div>
+      </router-link>
       
       <div class="admin-info">
         <div class="notification">
@@ -418,7 +418,7 @@
 
 <script>
 import { useToast } from 'vue-toastification';
-import axios from 'axios';
+import api from '@/api';
 
 export default {
   name: 'ManagementSoal',
@@ -507,10 +507,7 @@ export default {
     },
     async fetchCategories() {
         try {
-            const token = localStorage.getItem('auth_token');
-            const response = await axios.get('http://localhost:8000/api/kategori', {
-            headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/kategori');
             this.categories = response.data; // Jangan .map(item => item.nama)
         } catch (error) {
             console.error('Gagal memuat kategori:', error);
@@ -520,10 +517,7 @@ export default {
 
     async fetchTopics() {
         try {
-            const token = localStorage.getItem('auth_token');
-            const response = await axios.get('http://localhost:8000/api/topik', {
-            headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/topik');
             this.topics = response.data; // Jangan .map(item => item.nama)
         } catch (error) {
             console.error('Gagal memuat topik:', error);
@@ -542,10 +536,7 @@ export default {
     },
     async fetchSoals() {
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/admin/soal', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/admin/soal');
 
         this.soals = response.data.map(item => ({
           id: item.id,
@@ -605,7 +596,6 @@ export default {
     },
     async addNewSoal() {
       try {
-        const token = localStorage.getItem('auth_token');
 
         const payload = {
         kategori_id: this.newSoal.kategori,
@@ -618,11 +608,7 @@ export default {
         jawaban_benar: this.newSoal.jawaban_benar
         };
 
-        await axios.post('http://localhost:8000/api/soal', payload, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        await api.post('/soal', payload);
 
         this.toast.success('Soal berhasil ditambahkan!');
         this.fetchSoals();
@@ -634,7 +620,6 @@ export default {
       }
     },
     async saveSoalChanges() {
-      const token = localStorage.getItem('auth_token');
 
       const payload = {
         kategori_id: this.editingSoal.kategori,
@@ -648,11 +633,7 @@ export default {
       };
 
       try {
-        await axios.put(`http://localhost:8000/api/soal/${this.editingSoal.id}`, payload, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        await api.put(`/soal/${this.editingSoal.id}`, payload);
 
         this.toast.success('Soal berhasil diperbarui!');
         this.fetchSoals(); // refresh list soal dari server
@@ -664,14 +645,9 @@ export default {
     },
     async deleteSoal() {
       const id = this.soalToDelete.id;
-      const token = localStorage.getItem('auth_token');
 
       try {
-        await axios.delete(`http://localhost:8000/api/soal/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        await api.delete(`/soal/${id}`);
 
         this.toast.success('Soal berhasil dihapus');
         this.fetchSoals(); 
@@ -690,12 +666,7 @@ export default {
     },
     async fetchAdminProfile() {
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/user', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/user');
         this.adminProfile = response.data;
       } catch (error) {
         console.error('Gagal memuat profil admin:', error);

@@ -2,10 +2,10 @@
   <div class="admin-dashboard">
     <!-- Top Navigation Bar -->
     <div class="top-nav">
-      <div class="logo-container">
+      <router-link to="/admin" class="logo-container">
         <div class="logo">K</div>
         <h1>AsCodeAdmin</h1>
-      </div>
+      </router-link>
       
       <div class="admin-info">
         <div class="notification">
@@ -316,7 +316,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 import { useToast } from 'vue-toastification';
 
 export default {
@@ -355,27 +355,19 @@ export default {
   computed: {
     filteredMaterials() {
       let filtered = this.materials;
-
-      // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(material => 
-          material.title.toLowerCase().includes(query) || 
+        filtered = filtered.filter(material =>
+          material.title.toLowerCase().includes(query) ||
           material.category.toLowerCase().includes(query)
         );
       }
-
-      // Filter by category
       if (this.categoryFilter !== 'all') {
         filtered = filtered.filter(material => material.category === this.categoryFilter);
       }
-
-      // Filter by status
       if (this.topicFilter !== 'all') {
         filtered = filtered.filter(material => material.topic === this.topicFilter);
       }
-
-      // Sorting
       if (this.sortBy === 'recent') {
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       } else if (this.sortBy === 'oldest') {
@@ -385,229 +377,181 @@ export default {
       } else if (this.sortBy === 'title_desc') {
         filtered.sort((a, b) => b.title.localeCompare(a.title));
       }
-
       return filtered;
     },
     publishedCount() {
-      return this.materials.filter(material => material.status === 'published').length;
+      return this.materials.filter(m => m.status === 'published').length;
     },
     draftCount() {
-      return this.materials.filter(material => material.status === 'draft').length;
+      return this.materials.filter(m => m.status === 'draft').length;
     },
     totalPages() {
       return Math.ceil(this.filteredMaterials.length / this.itemsPerPage);
     },
     paginatedMaterials() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.filteredMaterials.slice(start, end);
+      return this.filteredMaterials.slice(start, start + this.itemsPerPage);
     }
   },
-methods: {
-  getRoleName(role) {
-    const roles = {
-      'student': 'Siswa',
-      'admin': 'Admin'
-    };
-    return roles[role] || role;
-  },
-  async fetchAdminProfile() {
-    try {
-      const token = localStorage.getItem('auth_token');
-      const response = await axios.get('http://localhost:8000/api/user', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      this.adminProfile = response.data;
-    } catch (error) {
-      console.error('Gagal memuat profil admin:', error);
-      useToast().error('Gagal memuat profil admin');
-    }
-  },
-  async fetchMaterials() {
-    try {
-      const response = await fetch('http://localhost:8000/api/materi', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}` 
-        }
-      });
-      const data = await response.json();
-
-      // Konversi nama key agar cocok dengan komponen kamu
-      this.materials = data.map(item => ({
-        id: item.id,
-        title: item.judul,
-        category: item.kategori?.nama,
-        topic: item.topik?.nama,
-        createdAt: this.formatDate(item.created_at),
-      }));
-    } catch (error) {
-      this.toast.error('Gagal memuat materi dari server');
-      console.error(error);
-    }
-  },
-  async fetchTopics() {
+  methods: {
+    getRoleName(role) {
+      const roles = {
+        student: 'Siswa',
+        admin: 'Admin'
+      };
+      return roles[role] || role;
+    },
+    async fetchAdminProfile() {
       try {
-        const response = await fetch('http://localhost:8000/api/topik', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
-        this.topics = data.map(t => t.nama); // Sesuaikan dengan struktur API
+        const response = await api.get('/user');
+        this.adminProfile = response.data;
       } catch (error) {
-        this.toast.error('Gagal memuat topik dari server');
+        console.error('Gagal memuat profil admin:', error);
+        this.toast.error('Gagal memuat profil admin');
       }
     },
-  formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  },
-
-  openAddMaterialModal() {
-    this.newMaterial = {
-      id: '',
-      title: '',
-      category: '',
-      createdAt: this.getCurrentDate(),
-      status: 'draft'
-    };
-    this.showAddMaterialModal = true;
-  },
-  closeAddMaterialModal() {
-    this.showAddMaterialModal = false;
-  },
-  openEditMaterialModal(material) {
-    this.editingMaterial = { ...material };
-    this.showEditMaterialModal = true;
-  },
-  closeEditMaterialModal() {
-    this.showEditMaterialModal = false;
-  },
-  confirmDeleteMaterial(material) {
-    this.materialToDelete = { ...material };
-    this.showDeleteConfirmation = true;
-  },
-  getCurrentDate() {
-    const now = new Date();
-    return now.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  },
-  addNewMaterial() {
-    const newId = 'MAT' + String(this.materials.length + 1).padStart(3, '0');
-
-    const newMat = {
-      ...this.newMaterial,
-      id: newId
-    };
-
-    this.materials.unshift(newMat);
-    this.closeAddMaterialModal();
-
-    this.toast.success(`Materi "${newMat.title}" berhasil ditambahkan`, {
-      timeout: 3000,
-      position: 'top-right'
-    });
-  },
-  saveMaterialChanges() {
-    const index = this.materials.findIndex(m => m.id === this.editingMaterial.id);
-
-    if (index !== -1) {
-      this.materials[index] = { ...this.editingMaterial };
-      this.closeEditMaterialModal();
-
-      this.toast.success(`Perubahan materi "${this.editingMaterial.title}" berhasil disimpan`, {
+    async fetchMaterials() {
+      try {
+        const response = await api.get('/materi');
+        this.materials = response.data.map(item => ({
+          id: item.id,
+          title: item.judul,
+          category: item.kategori?.nama,
+          topic: item.topik?.nama,
+          createdAt: this.formatDate(item.created_at)
+        }));
+      } catch (error) {
+        this.toast.error('Gagal memuat materi dari server');
+        console.error(error);
+      }
+    },
+    async fetchTopics() {
+      try {
+        const response = await api.get('/topik');
+        this.topics = response.data.map(t => t.nama);
+      } catch (error) {
+        this.toast.error('Gagal memuat topik dari server');
+        console.error(error);
+      }
+    },
+    formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    },
+    openAddMaterialModal() {
+      this.newMaterial = {
+        id: '',
+        title: '',
+        category: '',
+        createdAt: this.getCurrentDate(),
+        status: 'draft'
+      };
+      this.showAddMaterialModal = true;
+    },
+    closeAddMaterialModal() {
+      this.showAddMaterialModal = false;
+    },
+    openEditMaterialModal(material) {
+      this.editingMaterial = { ...material };
+      this.showEditMaterialModal = true;
+    },
+    closeEditMaterialModal() {
+      this.showEditMaterialModal = false;
+    },
+    confirmDeleteMaterial(material) {
+      this.materialToDelete = { ...material };
+      this.showDeleteConfirmation = true;
+    },
+    getCurrentDate() {
+      const now = new Date();
+      return now.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    },
+    addNewMaterial() {
+      const newId = 'MAT' + String(this.materials.length + 1).padStart(3, '0');
+      const newMat = { ...this.newMaterial, id: newId };
+      this.materials.unshift(newMat);
+      this.closeAddMaterialModal();
+      this.toast.success(`Materi "${newMat.title}" berhasil ditambahkan`, {
         timeout: 3000,
         position: 'top-right'
       });
-    }
-  },
-  async deleteMaterial() {
-    const id = this.materialToDelete.id;
-    const index = this.materials.findIndex(m => m.id === id);
-    const token = localStorage.getItem('auth_token');
+    },
+    saveMaterialChanges() {
+      const index = this.materials.findIndex(m => m.id === this.editingMaterial.id);
+      if (index !== -1) {
+        this.materials[index] = { ...this.editingMaterial };
+        this.closeEditMaterialModal();
+        this.toast.success(`Perubahan materi "${this.editingMaterial.title}" berhasil disimpan`, {
+          timeout: 3000,
+          position: 'top-right'
+        });
+      }
+    },
+    async deleteMaterial() {
+      const token = localStorage.getItem('auth_token');
+      const id = this.materialToDelete.id;
+      const index = this.materials.findIndex(m => m.id === id);
 
-    if (!token) {
-      this.toast.error('Token tidak ditemukan. Silakan login ulang.', {
-        timeout: 3000,
-        position: 'top-right'
-      });
-      return;
-    }
-
-    if (index === -1) {
-      this.toast.error('Materi tidak ditemukan dalam daftar.', {
-        timeout: 3000,
-        position: 'top-right'
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:8000/api/materi/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Gagal menghapus materi dari server');
+      if (!token) {
+        this.toast.error('Token tidak ditemukan. Silakan login ulang.');
+        return;
       }
 
-      const deletedTitle = this.materialToDelete.title;
-      this.materials.splice(index, 1);
-      this.showDeleteConfirmation = false;
+      if (index === -1) {
+        this.toast.error('Materi tidak ditemukan dalam daftar.');
+        return;
+      }
 
-      this.toast.success(`Materi "${deletedTitle}" berhasil dihapus`, {
-        timeout: 3000,
-        position: 'top-right'
-      });
+      try {
+        await api.delete(`/materi/${id}`);
 
-    } catch (error) {
-      console.error('Error deleting material:', error);
-      this.toast.error(`Gagal menghapus materi: ${error.message}`, {
-        timeout: 3000,
-        position: 'top-right'
-      });
-    }
-  },
-  toggleDropdown() {
-    this.showDropdown = !this.showDropdown;
-  },
-  logout() {
+        const deletedTitle = this.materialToDelete.title;
+        this.materials.splice(index, 1);
+        this.showDeleteConfirmation = false;
+
+        this.toast.success(`Materi "${deletedTitle}" berhasil dihapus`, {
+          timeout: 3000,
+          position: 'top-right'
+        });
+
+      } catch (error) {
+        console.error('Error deleting material:', error);
+        this.toast.error(`Gagal menghapus materi: ${error.response?.data?.message || error.message}`);
+      }
+    },
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+    },
+    logout() {
       localStorage.removeItem('token');
       this.$router.push('/login');
-  },
-  handleClickOutside(event) {
+    },
+    handleClickOutside(event) {
       if (this.showDropdown && !this.$refs.profileContainer.contains(event.target)) {
         this.showDropdown = false;
       }
+    }
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+    this.fetchMaterials();
+    this.fetchTopics();
+    this.fetchAdminProfile();
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
-},
-
-mounted() {
-  document.addEventListener('click', this.handleClickOutside);
-  this.fetchMaterials();
-  this.fetchTopics();
-  this.fetchAdminProfile();
-},
-beforeUnmount() {
-  document.removeEventListener('click', this.handleClickOutside);
-}
-
-}
+};
 </script>
+
 
 <style scoped>
 /* Base Styles */

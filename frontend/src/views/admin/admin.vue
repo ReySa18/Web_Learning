@@ -2,10 +2,10 @@
   <div class="admin-dashboard">
     <!-- Top Navigation Bar -->
     <div class="top-nav">
-      <div class="logo-container">
+      <router-link to="/admin" class="logo-container">
         <div class="logo">K</div>
         <h1>AsCodeAdmin</h1>
-      </div>
+      </router-link>
       
       <div class="admin-info">
         <div class="notification">
@@ -385,7 +385,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 import { useToast } from 'vue-toastification';
 
 export default {
@@ -433,7 +433,7 @@ export default {
     },
     logout() {
       localStorage.removeItem('auth_token');
-      this.$router.push('/login');
+      this.$router.push('/');
     },
     handleClickOutside(event) {
       if (this.showDropdown && !this.$refs.profileContainer.contains(event.target)) {
@@ -447,12 +447,7 @@ export default {
     },
     async fetchAdminProfile() {
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/user', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/user');
         this.adminProfile = response.data;
       } catch (error) {
         console.error('Gagal memuat profil admin:', error);
@@ -462,12 +457,7 @@ export default {
     async fetchUsers() {
       const toast = useToast();
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/users', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/users');
 
         this.users = response.data.map(user => ({
           ...user,
@@ -484,12 +474,7 @@ export default {
     async fetchMaterials() {
       const toast = useToast();
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/materi', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/materi');
 
         this.materials = response.data.map(item => ({
           id: item.id,
@@ -507,12 +492,7 @@ export default {
     async fetchSoals() {
       const toast = useToast();
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/admin/soal', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/admin/soal');
 
         this.questions = response.data.map(item => ({
           id: item.id,

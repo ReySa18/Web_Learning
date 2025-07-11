@@ -2,10 +2,10 @@
   <div class="admin-dashboard">
     <!-- Top Navigation Bar -->
     <div class="top-nav">
-      <div class="logo-container">
+      <router-link to="/admin" class="logo-container">
         <div class="logo">K</div>
         <h1>AsCodeAdmin</h1>
-      </div>
+      </router-link>
       
       <div class="admin-info">
         <div class="notification">
@@ -415,7 +415,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 import { useToast } from 'vue-toastification';
 
 
@@ -506,12 +506,7 @@ export default {
     async fetchUsers() {
       const toast = useToast();
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/users', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/users');
 
         this.users = response.data.map(user => ({
           ...user,
@@ -528,12 +523,7 @@ export default {
     },
     async fetchAdminProfile() {
       try {
-        const token = localStorage.getItem('auth_token');
-        const response = await axios.get('http://localhost:8000/api/user', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/user');
         this.adminProfile = response.data;
       } catch (error) {
         console.error('Gagal memuat profil admin:', error);
@@ -596,18 +586,16 @@ export default {
     // Di method addNewUser
     async addNewUser() {
       try {
-        const token = localStorage.getItem('auth_token');
         const toast = useToast();
         
         // Gunakan endpoint yang benar sesuai route Laravel
-        const response = await axios.post('http://localhost:8000/api/admin/users', {
+        const response = await api.post('/admin/users', {
           name: this.newUser.name,
           email: this.newUser.email,
           password: this.newUser.password,
           role: this.newUser.role,
         }, {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
@@ -644,7 +632,6 @@ export default {
     },
     async saveUserChanges() {
       const toast = useToast();
-      const token = localStorage.getItem('auth_token');
 
       const payload = {
         name: this.editingUser.name,
@@ -654,12 +641,11 @@ export default {
       };
 
       try {
-        await axios.put(
-          `http://localhost:8000/api/admin/users/${this.editingUser.id}`,
+        await api.put(
+          `/admin/users/${this.editingUser.id}`,
           payload,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }
@@ -690,14 +676,9 @@ export default {
     },
 
     async deleteUser() {
-      const token = localStorage.getItem('auth_token');
       const toast = useToast();
       try {
-        const response = await axios.delete(`http://localhost:8000/api/users/${this.userToDelete.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.delete(`/users/${this.userToDelete.id}`);
 
         // Hapus dari daftar lokal
         this.users = this.users.filter(user => user.id !== this.userToDelete.id);

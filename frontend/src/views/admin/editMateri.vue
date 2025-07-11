@@ -110,7 +110,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '@/api';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { useRoute, useRouter } from 'vue-router';
@@ -159,12 +159,7 @@ const editorOptions = {
 const fetchKategori = async () => {
   loadingKategori.value = true;
   try {
-    const token = localStorage.getItem('auth_token');
-    const response = await axios.get('http://localhost:8000/api/kategori', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await api.get('/kategori');
     kategoriList.value = response.data;
   } catch (error) {
     console.error('Gagal mengambil data kategori:', error);
@@ -178,12 +173,7 @@ const fetchKategori = async () => {
 const fetchTopik = async () => {
   loadingTopik.value = true;
   try {
-    const token = localStorage.getItem('auth_token');
-    const response = await axios.get('http://localhost:8000/api/topik', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await api.get('/topik');
     topikList.value = response.data;
   } catch (error) {
     console.error('Gagal mengambil data topik:', error);
@@ -224,12 +214,7 @@ const loadMateri = async () => {
       toast.error('Token tidak ditemukan. Anda harus login terlebih dahulu.');
       return;
     }
-
-    const response = await axios.get(`http://localhost:8000/api/materi/${route.params.id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await api.get(`/materi/${route.params.id}`);
     
     materi.value = response.data;
     loading.value = false;
@@ -257,25 +242,16 @@ const submit = async () => {
   formData.append('deskripsi', materi.value.deskripsi);
   formData.append('konten', materi.value.konten || '');
 
-  if (gambar.value) {
+  if (gambar.value instanceof File) {
     formData.append('gambar', gambar.value);
   }
 
-  const token = localStorage.getItem('auth_token');
-  if (!token) {
-    toast.error('Token tidak ditemukan. Anda harus login terlebih dahulu.');
-    isSubmitting.value = false;
-    return;
-  }
-
   try {
-    const response = await axios.post(`http://localhost:8000/api/materi/${route.params.id}`, formData, {
+    const response = await api.post(`/materi/${route.params.id}`, formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
       }
     });
-
     toast.success('Materi berhasil diperbarui!');
     setTimeout(() => {
       router.push('/materi');
@@ -284,15 +260,15 @@ const submit = async () => {
     console.error('Gagal mengupdate materi:', error);
     
     let errorMessage = 'Terjadi kesalahan saat mengupdate materi';
-    if (error.response && error.response.data && error.response.data.message) {
+    if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
     }
-    
     toast.error(errorMessage);
   } finally {
     isSubmitting.value = false;
   }
 };
+
 
 // Fungsi batal edit
 const cancelEdit = () => {
