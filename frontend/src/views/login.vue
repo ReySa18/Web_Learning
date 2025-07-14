@@ -38,6 +38,8 @@
               v-model="email"
               type="email" 
               required
+              @invalid="setCustomValidity('email', $event)"
+              @input="clearCustomMessage($event)"
               class="input-focus block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
               placeholder="nama@email.com"
             >
@@ -62,6 +64,8 @@
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
               required
+              @invalid="setCustomValidity('password', $event)"
+              @input="clearCustomMessage($event)"
               class="input-focus block w-full pl-10 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
               :class="password.length > 0 ? 'pr-12' : 'pr-3'"
               placeholder="••••••••"
@@ -181,6 +185,19 @@ const notification = ref({
   type: 'success'
 })
 
+
+ const setCustomValidity = (field, event) => {
+  if (field === 'email') {
+    event.target.setCustomValidity('Silakan isi email yang valid.')
+  } else if (field === 'password') {
+    event.target.setCustomValidity('Silakan isi kata sandi.')
+  }
+}
+
+const clearCustomMessage = (event) => {
+  event.target.setCustomValidity('')
+} 
+  
 const handleLogin = async () => {
   if (!email.value || !password.value) {
     showNotification('Mohon isi email dan password.', 'error')

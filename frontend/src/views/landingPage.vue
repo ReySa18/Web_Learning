@@ -27,10 +27,10 @@
           <!-- Desktop Navigation -->
           <div class="hidden md:block">
             <div class="ml-6 md:ml-10 flex items-baseline space-x-3 md:space-x-4">
-              <a href="#" @click.prevent="showLoginNotification" class="nav-active text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
-              <a href="#" @click.prevent="showLoginNotification" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kelas</a>
+              <a href="#" @click.prevent="showLoginNotification" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
+              <a href="#" @click.prevent="showLoginNotification" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Materi</a>
               <a href="#" @click.prevent="showLoginNotification" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Latihan Soal</a>
-              <a href="#" @click.prevent="showLoginNotification" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About Me</a>
+              <a href="#" @click.prevent="showLoginNotification" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About Dev</a>
             </div>
           </div>
 
@@ -389,7 +389,7 @@
           <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span class="text-xs">About Me</span>
+          <span class="text-xs">About Dev</span>
         </a>
       </div>
     </div>

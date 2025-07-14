@@ -27,9 +27,9 @@
           <div class="hidden md:block">
             <div class="ml-6 md:ml-10 flex items-baseline space-x-3 md:space-x-4">
               <router-link to="/home" class="nav-active text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</router-link>
-              <router-link to="/kelas" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kelas</router-link>
+              <router-link to="/kelas" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Materi</router-link>
               <router-link to="/kuis" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Latihan Soal</router-link>
-              <router-link to="/aboutme" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About Me</router-link>
+              <router-link to="/aboutme" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About Dev</router-link>
             </div>
           </div>
 
@@ -117,7 +117,7 @@
         <!-- Responsive card grid -->
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <router-link 
-            v-for="card in articles"
+            v-for="(card, index) in displayedArticles"
             :key="card.id"
             :to="`/isiMateri/${card.id}`"
             class="card-gradient rounded-xl p-4 md:p-6 card-hover transform transition-all duration-300 hover:shadow-xl"
@@ -185,7 +185,7 @@
                 <svg class="w-5 h-5 mb-0.5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-xs">About Me</span>
+                <span class="text-xs">About Dev</span>
             </router-link>
         </div>
     </div>
@@ -218,6 +218,10 @@ const userInitials = computed(() => {
     .map(n => n[0])
     .join('')
     .toUpperCase()
+})
+
+const displayedArticles = computed(() => {
+  return articles.value.slice(0, 6)
 })
 
 // Toggle dropdown
